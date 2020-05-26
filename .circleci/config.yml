@@ -21,12 +21,14 @@ jobs:
 
       - run:
           name: run_server
+          background: true
           command: |
-            ./sharpcd server &
+            ./sharpcd server
 
       - run:
           name: testing
           command: |
+            sleep 2
             curl -X POST http://localhost:5666
 
 workflows:
