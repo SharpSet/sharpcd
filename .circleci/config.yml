@@ -22,12 +22,10 @@ jobs:
       - run:
           name: run_server
           command: |
-            ./sharpcd server </dev/null &>/dev/null &
-
-            wget -qO- --post-data "" localhost:5666
+            ./sharpcd server &
 
       - run:
-          name: run_server
+          name: testing
           command: |
             wget -qO- --post-data "" localhost:5666
 
