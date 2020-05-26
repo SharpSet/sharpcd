@@ -27,8 +27,7 @@ jobs:
       - run:
           name: testing
           command: |
-            jobs
-            wget -qO- --post-data "" localhost:5666
+            curl -X POST http://localhost:5666
 
 workflows:
   version: 2
