@@ -4,7 +4,7 @@ variables:
   DOCKER_DRIVER: overlay2
 
 jobs:
-  test:
+  testing:
     docker:
       - image: sharp6292/ci-gopack:0.0.1a
 
@@ -26,7 +26,7 @@ jobs:
 
             wget -qO- --post-data "" localhost:5666
 
-     - run:
+      - run:
           name: run_server
           command: |
             wget -qO- --post-data "" localhost:5666
@@ -35,4 +35,4 @@ workflows:
   version: 2
   workflow:
     jobs:
-      - test
+      - testing
