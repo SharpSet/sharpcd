@@ -35,8 +35,6 @@ jobs:
       - run:
           name: testing
           command: |
-            apt-get install lsof -y
-
             sleep 2
             ./sharpcd
 
