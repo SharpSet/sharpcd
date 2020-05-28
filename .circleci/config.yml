@@ -21,21 +21,21 @@ jobs:
             GOOS: "linux"
 
       - run:
-          name: run_server
-          background: true
-          command: |
-            ./sharpcd server
-
-      - run:
           name: Get Keys
           command: |
             mkdir ./private
             openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout ./private/server.key -out ./private/server.crt -config ./.circleci/openssl.conf -extensions 'v3_req'
 
       - run:
+          name: run_server
+          background: true
+          command: |
+            ./sharpcd server
+
+      - run:
           name: testing
           command: |
-            apk add lsof
+            apt-get install lsof -y
 
             sleep 2
             ./sharpcd
