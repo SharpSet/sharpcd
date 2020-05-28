@@ -26,10 +26,18 @@ jobs:
             ./sharpcd server
 
       - run:
+          name: Get Keys
+          command: |
+            mkdir ./private
+            openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout ./private/server.key -out ./private/server.crt -config ./.circleci/openssl.conf -extensions 'v3_req'
+
+      - run:
           name: testing
           command: |
+            apk add lsof
+
             sleep 2
-            curl -X POST http://localhost:5666
+            ./sharpcd
 
 workflows:
   version: 2
