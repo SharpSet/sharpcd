@@ -17,7 +17,7 @@ func main() {
 				server()
 			default:
 				log.Fatal("This subcommand does not exist!")
-			}
+		}
 	}
 	return
 }

@@ -32,11 +32,14 @@ func client() {
 			Enviroment: env,
 			Key: "password"}
 
-		post(payload, task.SharpURL)
+		err = post(payload, task.SharpURL)
+		if err == nil {
+			fmt.Printf("Command %s succesfully sent!", task.Name)
+		}
 	}
 }
 
-func post (payload postData, url string) {
+func post (payload postData, url string) error {
     jsonStr, err := json.Marshal(payload)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
@@ -58,4 +61,12 @@ func post (payload postData, url string) {
 	body, err := ioutil.ReadAll(resp.Body)
 	clientErrCheck(err, "Failed to read body of response")
     fmt.Println("response Body:", string(body))
+
+	switch resp.StatusCode {
+		case 200:
+			return nil
+
+		default:
+			return err
+	}
 }

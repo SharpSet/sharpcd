@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"fmt"
 )
 
 func server() {
@@ -35,6 +36,7 @@ func server() {
 		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
 	}
 	log.Fatal(srv.ListenAndServeTLS("private/server.crt", "private/server.key"))
+	fmt.Println("Server Successfully Running!")
 }
 
 // Takes a command with POST data
