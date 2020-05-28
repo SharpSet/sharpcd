@@ -6,7 +6,7 @@ variables:
 jobs:
   testing:
     docker:
-      - image: cimg/go:1.13
+      - image: circleci/golang:1.12
 
     steps:
       - checkout
