@@ -6,7 +6,7 @@ variables:
 jobs:
   testing:
     docker:
-      - image: sharp6292/ci-gopack:0.0.1a
+      - image: cimg/go:1.13
 
     steps:
       - checkout
