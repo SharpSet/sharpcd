@@ -16,6 +16,8 @@ jobs:
           command: |
             go get github.com/joho/godotenv
             go get /go/src/gopkg.in/yaml.v2
+            go get golang.org/x/crypto/bcrypt
+
             go build -o "sharpcd" ./src
 
           environment:
