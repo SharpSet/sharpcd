@@ -7,17 +7,22 @@ tasks:
     type: docker
     sharpurl: https://localhost:5666
     envfile: .env
-    giturl: https://github.com/Sharpz7/test
-    command: |
-      cat 32
-      ghiagaown
+    giturl: https://github.com/Sharpz7
 
   testing2:
     name: Testing Task v0.2
     type: git
     sharpurl: https://localhost:5666
-    envfile: .envfile
-    giturl: https://github.com/Sharpz7/test2
+    giturl: https://github.com/Sharpz7
+    command: |
+      tv 56
+      tnnfuie4nfu
+
+  testing3:
+    name: Testing Task v0.3
+    type: git
+    sharpurl: https://localhost:5666
+    giturl: https://google.com/Sharpz7
     command: |
       tv 56
       tnnfuie4nfu

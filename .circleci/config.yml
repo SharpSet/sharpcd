@@ -14,6 +14,7 @@ jobs:
       - run:
           name: compile
           command: |
+            go get github.com/joho/godotenv
             go get /go/src/gopkg.in/yaml.v2
             go build -o "sharpcd" ./src
 
@@ -27,6 +28,11 @@ jobs:
             openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout ./private/server.key -out ./private/server.crt -config ./.circleci/openssl.conf -extensions 'v3_req'
 
       - run:
+          name: Create Password
+          command: |
+            ./sharpcd --pass Pass123 setpass
+
+      - run:
           name: run_server
           background: true
           command: |
@@ -36,7 +42,7 @@ jobs:
           name: testing
           command: |
             sleep 2
-            ./sharpcd
+            ./sharpcd --pass Pass123
 
 workflows:
   version: 2

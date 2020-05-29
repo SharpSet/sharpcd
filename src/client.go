@@ -1,15 +1,17 @@
 package main
 
 import (
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"fmt"
-	"net/http"
 	"bytes"
-	"encoding/json"
 	"crypto/tls"
-)
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 
+	"github.com/joho/godotenv"
+	"gopkg.in/yaml.v2"
+)
 
 func client() {
 
@@ -19,54 +21,78 @@ func client() {
 	err = yaml.Unmarshal(f, &con)
 	clientErrCheck(err, "Failed to read and extract config.yml")
 
-	// testing making enviroment map
-	env := make(map[string]string)
-	env["TEST"] = "HELLO"
-
+	// POST to sharpcd server for each task
 	for _, task := range con.Tasks {
-		payload := postData{
-			Name: task.Name,
-			Type: task.Type,
-			GitURL: task.GitURL,
-			Command: task.Command,
-			Enviroment: env,
-			Key: "password"}
 
+		payload := postData{
+			Name:       task.Name,
+			Type:       task.Type,
+			GitURL:     task.GitURL,
+			Command:    task.Command,
+			Enviroment: getEnviroment(task.Envfile),
+			Key:        getPwd()}
+
+		// Make POST request and let user know if successful
 		err = post(payload, task.SharpURL)
 		if err == nil {
-			fmt.Printf("Command %s succesfully sent!", task.Name)
+			fmt.Printf("Command %s succesfully sent!\n\n", task.Name)
+		} else {
+			fmt.Println(err)
+			fmt.Printf("Command %s Failed!\n\n", task.Name)
 		}
 	}
 }
 
-func post (payload postData, url string) error {
-    jsonStr, err := json.Marshal(payload)
-
+// Makes POST Request adn reads response
+func post(payload postData, url string) error {
+	// Create POST request with JSON
+	jsonStr, err := json.Marshal(payload)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	clientErrCheck(err, "Failed to create request")
 
-    req.Header.Set("Content-Type", "application/json")
-    client := &http.Client{
+	// Create client
+	// Allow self-signed certs
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},
 		},
 	}
-    resp, err := client.Do(req)
-	clientErrCheck(err, "Failed to do POST request")
-    defer resp.Body.Close()
 
-	fmt.Println("response Status:", resp.StatusCode)
+	// Do Request
+	resp, err := client.Do(req)
+	clientErrCheck(err, "Failed to do POST request")
+	defer resp.Body.Close()
+
+	// Read Body and Status
 	body, err := ioutil.ReadAll(resp.Body)
 	clientErrCheck(err, "Failed to read body of response")
-    fmt.Println("response Body:", string(body))
 
-	switch resp.StatusCode {
-		case 200:
-			return nil
+	var respBody response
+	err = json.Unmarshal(body, &respBody)
+	clientErrCheck(err, "Failed to convert repsonse to JSON")
 
-		default:
-			return err
+	// Checks if status is OK
+	if resp.StatusCode != statusAcceptedTask {
+		return errors.New(respBody.Message)
 	}
+
+	return nil
+}
+
+func getEnviroment(loc string) map[string]string {
+
+	var env map[string]string
+
+	// If no envfile specified end function
+	if len(loc) == 0 {
+		return env
+	}
+
+	// Get env contents
+	env, err := godotenv.Read(loc)
+	clientErrCheck(err, "Failed to Load .env")
+	return env
 }
