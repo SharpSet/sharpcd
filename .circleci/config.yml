@@ -6,7 +6,7 @@ variables:
 jobs:
   testing:
     docker:
-      - image: circleci/golang:1.12
+      - image: sharp6292/gopack:0.1.0
 
     steps:
       - checkout
@@ -14,10 +14,7 @@ jobs:
       - run:
           name: compile
           command: |
-            go get github.com/joho/godotenv
-            go get /go/src/gopkg.in/yaml.v2
-            go get golang.org/x/crypto/bcrypt
-            go get golang.org/x/sys/unix
+            gopack --file --dev install
 
             go build -o "sharpcd" ./src
 
