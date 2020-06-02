@@ -16,10 +16,10 @@ import (
 func client() {
 
 	// Get config, get data from it
-	f, err := ioutil.ReadFile("./config.yml")
+	f, err := ioutil.ReadFile("./sharpcd.yml")
 	var con config
 	err = yaml.Unmarshal(f, &con)
-	clientErrCheck(err, "Failed to read and extract config.yml")
+	clientErrCheck(err, "Failed to read and extract sharpcd.yml")
 
 	// POST to sharpcd server for each task
 	for _, task := range con.Tasks {
