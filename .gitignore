@@ -1,2 +1,4 @@
 internal/sharpcd
 internal/filter.yml
+.env
+scripts
