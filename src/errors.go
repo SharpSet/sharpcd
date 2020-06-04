@@ -12,10 +12,7 @@ import (
 // Records as Fatal
 func handle(e error, msg string) {
 	// Try and get SHARPDEV var
-	err := godotenv.Load()
-	if err != nil {
-		fmt.Println("Cannot read enviroment")
-	}
+	godotenv.Load()
 
 	if e != nil {
 		if os.Getenv("SHARPDEV") == "TRUE" {

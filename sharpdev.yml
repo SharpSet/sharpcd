@@ -1,5 +1,4 @@
 version: 0.1
-envfile: .env
 scripts:
   build: go build -o ./internal/sharpcd ./src
   revert: git revert ${SHARP_ARG_1}..HEAD
