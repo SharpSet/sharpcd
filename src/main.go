@@ -14,7 +14,21 @@ var passFlag string
 
 // Create Flags needed
 func init() {
-	flag.StringVar(&passFlag, "pass", "", "Create a new password")
+	flag.StringVar(&passFlag, "pass", "", "Put password as a arg for automation tasks")
+
+	// Creates Helper Function
+	flag.Usage = func() {
+		fmt.Println(`
+Args of SharpCD:
+
+	- server: Run the sharpcd server
+	- setpass: Set the password for API and Task Calls
+
+This will read the sharpdev.yml file
+		`)
+
+		flag.PrintDefaults()
+	}
 }
 
 func main() {
@@ -39,23 +53,6 @@ func main() {
 	return
 }
 
-// Checks for client err
-// Records as Fatal
-func clientErrCheck(e error, msg string) {
-	if e != nil {
-		fmt.Println(e)
-		log.Fatal(msg)
-	}
-}
-
-// checks for server err
-// Writes response given to header
-func serverErrCheck(e error, status int, passedChecks *int) {
-	if e != nil {
-		*passedChecks = status;
-	}
-}
-
 func getPwd() string {
 
 	// If password is not in args
@@ -64,7 +61,7 @@ func getPwd() string {
 		// Get password from user
 		fmt.Println("Enter password: ")
 		pwd, err := terminal.ReadPassword(0)
-		clientErrCheck(err, "Failed to read password")
+		check(err, "Failed to read password")
 		return string(pwd)
 	}
 
@@ -80,11 +77,11 @@ func setPwd() {
 
 	// Use Bcyrpt to hash and salt
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.MinCost)
-	clientErrCheck(err, "Failed to generate password hash")
+	check(err, "Failed to generate password hash")
 
 	// Store file
 	err = ioutil.WriteFile("./private/hash.key", hash, 0644)
-	clientErrCheck(err, "Failed to save hash")
+	check(err, "Failed to save hash")
 
 	if err == nil {
 		fmt.Println("Password successfully created!")

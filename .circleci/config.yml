@@ -6,7 +6,7 @@ variables:
 jobs:
   testing:
     docker:
-      - image: sharp6292/gopack:0.1.0
+      - image: sharp6292/gopack:0.1.2
 
     steps:
       - checkout

@@ -2,27 +2,10 @@ version: 1
 
 tasks:
 
-  testing:
-    name: Testing Task v0.1
+  sharpcd_task:
+    name: Testing Task V1
     type: docker
     sharpurl: https://localhost:5666
     envfile: .env
-    giturl: https://github.com/Sharpz7
-
-  testing2:
-    name: Testing Task v0.2
-    type: git
-    sharpurl: https://localhost:5666
-    giturl: https://github.com/Sharpz7
-    command: |
-      tv 56
-      tnnfuie4nfu
-
-  testing3:
-    name: Testing Task v0.3
-    type: git
-    sharpurl: https://localhost:5666
-    giturl: https://google.com/Sharpz7
-    command: |
-      tv 56
-      tnnfuie4nfu
+    giturl: https://raw.githubusercontent.com/Sharpz7/sharpcd/testing/
+    compose: /.circleci/docker-compose.yml
