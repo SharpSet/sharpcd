@@ -1,14 +1,53 @@
 package main
 
-const (
-	statusNotPostMethod    = 606
-	statusAcceptedTask     = 601
-	statusFailedToReadBody = 607
-	statusBodyNotJSON      = 608
-	statusBannedURL        = 609
-	statusIncorrectPass    = 610
-	statusCommDoesNotExist = 612
-)
+type statusCodes struct {
+	NotPostMethod    int
+	Accepted         int
+	FailedToReadBody int
+	BodyNotJSON      int
+	BannedURL        int
+	IncorrectSecret  int
+	CommDoesNotExist int
+	FailedLogRead    int
+}
+
+var statCode = statusCodes{
+	NotPostMethod:    606,
+	Accepted:         607,
+	FailedToReadBody: 608,
+	BodyNotJSON:      612,
+	IncorrectSecret:  613,
+	FailedLogRead:    614,
+	BannedURL:        616,
+	CommDoesNotExist: 617}
+
+type jobStats struct {
+	Running  string
+	Errored  string
+	Stopped  string
+	Building string
+	Stopping string
+}
+
+var jobStatus = jobStats{
+	Running:  "running",
+	Errored:  "errored",
+	Stopped:  "stopped",
+	Building: "building",
+	Stopping: "stopping"}
+
+type taskJob struct {
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	Type   string `json:"type"`
+	Status string `json:"status"`
+	ErrMsg string `json:"err_msg"`
+	URL    string `json:"url"`
+}
+
+type allTaskJobs struct {
+	List []*taskJob
+}
 
 type postData struct {
 	ID         string            `json:"id"`
@@ -17,7 +56,7 @@ type postData struct {
 	GitURL     string            `json:"giturl"`
 	Command    string            `json:"command"`
 	Enviroment map[string]string `json:"enviroment"`
-	Key        string            `json:"key"`
+	Secret     string            `json:"secret"`
 	Compose    string            `json:"compose"`
 }
 
@@ -42,13 +81,19 @@ type filter struct {
 }
 
 type response struct {
-	Message string `json:"msg"`
+	Jobs    []*taskJob `json:"jobs"`
+	Message string     `json:"msg"`
 }
 
-type apiResponse struct {
-	Procs []*taskProcess `json:"processes"`
+type allDirs struct {
+	Root    string
+	Private string
+	Logs    string
+	Docker  string
 }
 
-type apiData struct {
-	Key string `json:"key"`
-}
+var folder = allDirs{
+	Root: getDir()+"/",
+	Private: getDir()+"/private/",
+	Logs: getDir()+"/logs/",
+	Docker: getDir()+"/docker/"}

@@ -20,7 +20,7 @@ func client() {
 	f, err := ioutil.ReadFile("./sharpcd.yml")
 	var con config
 	err = yaml.Unmarshal(f, &con)
-	check(err, "Failed to read and extract sharpcd.yml")
+	handle(err, "Failed to read and extract sharpcd.yml")
 
 	// POST to sharpcd server for each task
 	for id, task := range con.Tasks {
@@ -37,7 +37,7 @@ func client() {
 			Command:    task.Command,
 			Compose:    task.Compose,
 			Enviroment: getEnviroment(task.Envfile),
-			Key:        getPwd()}
+			Secret:     getSec()}
 
 		// Make POST request and let user know if successful
 		err = post(payload, task.SharpURL)
@@ -55,7 +55,7 @@ func post(payload postData, url string) error {
 	// Create POST request with JSON
 	jsonStr, err := json.Marshal(payload)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-	check(err, "Failed to create request")
+	handle(err, "Failed to create request")
 
 	// Create client
 	// Allow self-signed certs
@@ -70,25 +70,26 @@ func post(payload postData, url string) error {
 
 	// Do Request
 	resp, err := client.Do(req)
-	check(err, "Failed to do POST request")
+	handle(err, "Failed to do POST request")
 	defer resp.Body.Close()
 
 	// Read Body and Status
 	body, err := ioutil.ReadAll(resp.Body)
-	check(err, "Failed to read body of response")
+	handle(err, "Failed to read body of response")
 
 	var respBody response
 	err = json.Unmarshal(body, &respBody)
-	check(err, "Failed to convert repsonse to JSON")
+	handle(err, "Failed to convert repsonse to JSON")
 
 	// Checks if status is OK
-	if resp.StatusCode != statusAcceptedTask {
+	if resp.StatusCode != statCode.Accepted {
 		return errors.New(respBody.Message)
 	}
 
 	return nil
 }
 
+// Get the enviromental vars from a env file
 func getEnviroment(loc string) map[string]string {
 
 	var env map[string]string
@@ -100,6 +101,6 @@ func getEnviroment(loc string) map[string]string {
 
 	// Get env contents
 	env, err := godotenv.Read(loc)
-	check(err, "Failed to Load .env")
+	handle(err, "Failed to Load .env")
 	return env
 }

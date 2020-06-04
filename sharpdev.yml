@@ -1,14 +1,18 @@
 version: 0.1
 envfile: .env
 scripts:
-  build: go build -o sharpcd ./src
+  build: go build -o ./internal/sharpcd ./src
   revert: git revert ${SHARP_ARG_1}..HEAD
   list: git branch
   archive: |
    git tag archive/${SHARP_ARG_1} ${SHARP_ARG_1} &&
    git branch -d ${SHARP_ARG_1}
 
-  api: curl -k -X POST -d {"key":"Pass123"} https://localhost:5666/api
-  server: sudo ./sharpcd server
-  client: ./sharpcd --pass Pass123
+  apijobs: curl -k -X POST -d {"secret":"Secret123"} https://localhost:5666/api/jobs/
+  apilogs: curl -k -X POST -d {"secret":"Secret123"} https://localhost:5666/api/logs/sharpcd_task
+  server: sudo ./internal/sharpcd server
+  client: ./internal/sharpcd --secret Secret123
+  kill: zsh ./testing/kill.sh
+  filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/sharpcd/testing
+  remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/sharpcd/testing
 

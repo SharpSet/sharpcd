@@ -16,7 +16,7 @@ jobs:
           command: |
             gopack --file --dev install
 
-            go build -o "sharpcd" ./src
+            go build -o "./internal/sharpcd" ./src
 
           environment:
             GOOS: "linux"
@@ -24,25 +24,26 @@ jobs:
       - run:
           name: Get Keys
           command: |
-            mkdir ./private
-            openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout ./private/server.key -out ./private/server.crt -config ./.circleci/openssl.conf -extensions 'v3_req'
+            openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout ./internal/private/server.key -out ./internal/private/server.crt -config ./internal/private/openssl.conf -extensions 'v3_req'
 
       - run:
-          name: Create Password
+          name: Create Secret
           command: |
-            ./sharpcd --pass Pass123 setpass
+            ./internal/sharpcd --secret Secret123 setsecret
 
       - run:
           name: run_server
           background: true
           command: |
-            ./sharpcd server
+            ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/sharpcd/testing
+            ./internal/sharpcd server
 
       - run:
           name: testing
           command: |
             sleep 2
-            ./sharpcd --pass Pass123
+            ./internal/sharpcd --secret Secret123
+            curl -k -X POST -d {"secret":"Secret123"} https://localhost:5666/api/jobs/
 
 workflows:
   version: 2

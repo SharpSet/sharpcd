@@ -1,3 +1,3 @@
-go build -o "sharpcd" ./src
+go build -o "./internal/sharpcd" ./src
 
-./sharpcd --pass Pass123 setpass
+./internal/sharpcd --secret Secret123 setsecret
