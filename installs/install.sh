@@ -21,8 +21,8 @@ fi
 
 # Gen Keys
 IP="$(hostname -I | cut -d' ' -f1)"
-sed -i -e "s/XXXXX/$IP/g" /usr/local/bin/sharpcd-data/private/openssl.conf
-openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout /usr/local/bin/sharpcd-data/private/server.key -out /usr/local/bin/sharpcd-data/private/server.crt -config /usr/local/bin/sharpcd-data/private/openssl.conf -extensions 'v3_req'
+sudo sed -i -e "s/XXXXX/$IP/g" /usr/local/bin/sharpcd-data/private/openssl.conf
+sudo openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout /usr/local/bin/sharpcd-data/private/server.key -out /usr/local/bin/sharpcd-data/private/server.crt -config /usr/local/bin/sharpcd-data/private/openssl.conf -extensions 'v3_req'
 
 # Permissions
 sudo chmod +x /usr/local/bin/sharpcd
