@@ -25,6 +25,6 @@ scripts:
   apijobs: curl -k -X POST -d SECRET https://localhost:5666/api/jobs/
   apilogs: curl -k -X POST -d SECRET https://localhost:5666/api/logs/sharpcd_task
   apijob: curl -k -X POST -d SECRET https://localhost:5666/api/job/sharpcd_task
-  filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/sharpcd/testing
-  remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/sharpcd/testing
+  filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
+  remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/
 
