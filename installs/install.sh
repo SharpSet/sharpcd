@@ -12,8 +12,8 @@ sudo tar -C /usr/local/bin/ -zxvf linux.tar.gz
 rm -r linux.tar.gz
 
 # Create SharpCD User
-test="$(grep -c '^sharpcd:' /etc/passwd)"
-if  $test == "0"; then
+test=$(grep -c '^sharpcd:' /etc/passwd)
+if [ $test == 0 ] then
     sudo useradd sharpcd
     sudo groupadd docker
     sudo usermod -aG docker sharpcd
