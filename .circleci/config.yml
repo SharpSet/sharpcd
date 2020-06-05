@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   testing:
     docker:
-      - image: golang:alpine3.12
+      - image: cimg/go:1.12
 
     steps:
       - checkout
