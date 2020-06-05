@@ -1,5 +1,5 @@
 version: '2'
 services:
-  test:
+  hello_world:
     image: ubuntu
-    command: tail -F testing
+    command: [/bin/echo, 'Hello world']
