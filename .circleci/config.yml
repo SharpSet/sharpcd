@@ -1,12 +1,9 @@
-version: 2
-
-variables:
-  DOCKER_DRIVER: overlay2
+version: 2.1
 
 jobs:
   testing:
     docker:
-      - image: sharp6292/gopack:0.1.2
+      - image: golang:alpine3.12
 
     steps:
       - checkout
@@ -14,6 +11,7 @@ jobs:
       - run:
           name: compile
           command: |
+            curl -s -L https://github.com/Sharpz7/gopack/releases/download/0.1.2/install.sh | bash
             gopack --file --dev install
 
             go build -o "./internal/sharpcd" ./src
