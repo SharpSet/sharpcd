@@ -1,10 +1,8 @@
 version: 0.1
 envfile: .env
 
-args:
-  SECRET: "{'secret': 'Secret123'}"
-  RUNCOMMAND: sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
-  BACKGROUND: sudo ./internal/sharpcd server &
+values:
+  SECRET: '{\"secret\":\"Secret123\"}'
 
 scripts:
   build: go build -o ./internal/sharpcd ./src
@@ -14,15 +12,19 @@ scripts:
    git tag archive/${SHARP_ARG_1} ${SHARP_ARG_1} &&
    git branch -d ${SHARP_ARG_1}
 
-  run: |
+  server: |
     sudo apt-get install -y lsof &&
-    /bin/sh -c RUNCOMMAND &&
+    sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true &&
     sharpdev build &&
-    /bin/sh -c BACKGROUND
+    sudo ./internal/sharpcd server &
+
+  client: |
+    sharpdev build &&
+    ./internal/sharpcd --secret Secret123
 
   apijobs: curl -k -X POST -d SECRET https://localhost:5666/api/jobs/
   apilogs: curl -k -X POST -d SECRET https://localhost:5666/api/logs/sharpcd_task
-  client: ./internal/sharpcd --secret Secret123
+  apijob: curl -k -X POST -d SECRET https://localhost:5666/api/job/sharpcd_task
   filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/sharpcd/testing
   remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/sharpcd/testing
 

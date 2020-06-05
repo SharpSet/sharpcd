@@ -1,52 +1,20 @@
 version: 2.1
 
-jobs:
-  testing:
-    docker:
-      - image: cimg/go:1.12
+orbs:
+  release: sharptools/release@0.0.3
+  go: sharptools/go@0.0.4
 
-    steps:
-      - checkout
-
-      - run:
-          name: compile
-          command: |
-            curl -s -L https://github.com/Sharpz7/gopack/releases/download/0.1.2/install.sh | bash
-            gopack --file --dev install
-
-            go build -o "./internal/sharpcd" ./src
-
-          environment:
-            GOOS: "linux"
-
-      - run:
-          name: Get Keys
-          command: |
-            IP="$(hostname -I | cut -d' ' -f1)"
-            sed -i -e "s/XXXXX/$IP/g" ./internal/private/openssl.conf
-            openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout ./internal/private/server.key -out ./internal/private/server.crt -config ./internal/private/openssl.conf -extensions 'v3_req'
-
-      - run:
-          name: Create Secret
-          command: |
-            ./internal/sharpcd --secret Secret123 setsecret
-
-      - run:
-          name: run_server
-          background: true
-          command: |
-            ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/sharpcd/testing
-            ./internal/sharpcd server
-
-      - run:
-          name: testing
-          command: |
-            sleep 2
-            ./internal/sharpcd --secret Secret123
-            curl -k -X POST -d {"secret":"Secret123"} https://localhost:5666/api/jobs/
 
 workflows:
-  version: 2
   workflow:
     jobs:
-      - testing
+      - go/package:
+          appname: sharpcd
+
+      - release/github_job:
+          context: General
+          requires:
+            - go/package
+          filters:
+            branches:
+              only: master

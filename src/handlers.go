@@ -28,6 +28,7 @@ func httpHandleAPI(w http.ResponseWriter, r *http.Request) {
 	if status == statCode.Accepted {
 
 	} else {
+		resp = response{}
 		resp.Message = getFailMessage(status)
 	}
 

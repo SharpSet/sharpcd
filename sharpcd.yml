@@ -6,5 +6,5 @@ tasks:
     name: Testing Task V1
     type: docker
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/sharpcd/testing/
-    compose: /.circleci/docker-compose.yml
+    giturl: https://raw.githubusercontent.com/Sharpz7/
+    compose: /sharpcd/testing/.circleci/docker-compose.yml

@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v2"
@@ -40,18 +41,19 @@ func client() {
 			Secret:     getSec()}
 
 		// Make POST request and let user know if successful
-		err = post(payload, task.SharpURL)
-		if err == nil {
+		body, code := post(payload, task.SharpURL)
+		if code == statCode.Accepted {
 			fmt.Printf("Task %s succesfully sent!\n\n", task.Name)
+			postCommChecks(task, id)
 		} else {
-			fmt.Println(err)
+			fmt.Println(body.Message)
 			fmt.Printf("Task %s Failed!\n\n", task.Name)
 		}
 	}
 }
 
 // Makes POST Request adn reads response
-func post(payload postData, url string) error {
+func post(payload postData, url string) (response, int) {
 	// Create POST request with JSON
 	jsonStr, err := json.Marshal(payload)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
@@ -81,12 +83,7 @@ func post(payload postData, url string) error {
 	err = json.Unmarshal(body, &respBody)
 	handle(err, "Failed to convert repsonse to JSON")
 
-	// Checks if status is OK
-	if resp.StatusCode != statCode.Accepted {
-		return errors.New(respBody.Message)
-	}
-
-	return nil
+	return respBody, resp.StatusCode
 }
 
 // Get the enviromental vars from a env file
@@ -103,4 +100,42 @@ func getEnviroment(loc string) map[string]string {
 	env, err := godotenv.Read(loc)
 	handle(err, "Failed to Load .env")
 	return env
+}
+
+func postCommChecks(t task, id string) {
+	jobURL := t.SharpURL + "/api/job/" + id
+	payload := postData{
+		Secret: getSec()}
+	buildingTriggered := false
+	stoppingTriggered := false
+
+	fmt.Println("Waiting on server response...")
+	time.Sleep(2 * time.Second)
+	for {
+		resp, code := post(payload, jobURL)
+		if code != statCode.Accepted {
+			log.Fatal("Something went wrong using the API!")
+			break
+		}
+
+		job := resp.Job
+
+		if job.Status == jobStatus.Stopping && !stoppingTriggered {
+			stoppingTriggered = true
+			fmt.Println("The Task already exists on server. Stopping old job...")
+		}
+
+		if job.Status == jobStatus.Building && !buildingTriggered {
+			buildingTriggered = true
+			fmt.Println("The Task is now building a job")
+		}
+
+		if job.Status == jobStatus.Running {
+			break
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+
+	fmt.Println("Task Has Successfully started running!")
 }

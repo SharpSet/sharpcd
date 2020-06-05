@@ -82,6 +82,7 @@ type filter struct {
 
 type response struct {
 	Jobs    []*taskJob `json:"jobs"`
+	Job     *taskJob   `json:"job"`
 	Message string     `json:"msg"`
 }
 
@@ -93,7 +94,7 @@ type allDirs struct {
 }
 
 var folder = allDirs{
-	Root: getDir()+"/",
-	Private: getDir()+"/private/",
-	Logs: getDir()+"/logs/",
-	Docker: getDir()+"/docker/"}
+	Root:    getDir() + "/sharpcd-data/",
+	Private: getDir() + "/sharpcd-data/private/",
+	Logs:    getDir() + "/sharpcd-data/logs/",
+	Docker:  getDir() + "/sharpcd-data/docker/"}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -17,6 +18,9 @@ func getAPIData(r *http.Request, resp *response) error {
 	case "jobs":
 		resp.Jobs = allJobs.List
 		return nil
+	case "job":
+		resp.Job, err = getJobs(path[1])
+		return err
 	case "logs":
 		resp.Message, err = getLogs(path[1])
 		return err
@@ -40,4 +44,16 @@ func getLogs(path string) (string, error) {
 	}
 
 	return string(bytes), nil
+}
+
+func getJobs(path string) (*taskJob, error) {
+	var emptyJob *taskJob
+
+	for _, job := range allJobs.List {
+		if job.ID == path {
+			return job, nil
+		}
+	}
+
+	return emptyJob, errors.New("job not found")
 }
