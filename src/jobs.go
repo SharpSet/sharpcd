@@ -33,6 +33,9 @@ func createJob(payload postData) {
 		Name: payload.Name,
 		Type: payload.Type,
 		URL:  payload.GitURL + payload.Compose}
+	
+	// Load Env Vars in
+	loadEnv(payload.Enviroment)
 
 	// If a job with that ID already exists
 	if job := getJob(payload.ID); job != nil {
@@ -104,6 +107,13 @@ func (job *taskJob) DockerStop() *exec.Cmd {
 	return cmd
 }
 
+// Load in Enviroment from postData
+func loadEnv(data map[string]string) {
+	for key, val := range data {
+		os.Setenv(key, val)
+	}
+}
+
 // Run sequence for a Docker job
 func (job *taskJob) DockerRun() *exec.Cmd {
 
@@ -139,6 +149,7 @@ func (job *taskJob) DockerRun() *exec.Cmd {
 
 	outfile, err := os.Create(logsLoc + "/info.log")
 	handleAPI(err, job, "Failed to create log file")
+	cmd.Env = os.Environ()
 	cmd.Stdout = outfile
 
 	return cmd
