@@ -2,5 +2,10 @@ version: '3'
 services:
   hello_world:
     image: ubuntu
+    command: tail -F anything
+    restart: always
+
+  hello_world2:
+    image: ubuntu
     command: ["/bin/sh", "-c", "echo Hello && sleep 4"]
     restart: always

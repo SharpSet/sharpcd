@@ -134,8 +134,14 @@ func postCommChecks(t task, id string) error {
 			log.Fatal("Something went wrong using the API!")
 			return errors.New("Bad API")
 		}
+		resp2, code := post(payload, logsURL)
+		if code != statCode.Accepted {
+			log.Fatal("Something went wrong using the API!")
+			return errors.New("Bad API")
+		}
 
 		job := resp.Job
+		logFile := resp2.Message
 
 		if job.Status == jobStatus.Stopping && !stoppingTriggered {
 			stoppingTriggered = true
@@ -153,21 +159,19 @@ func postCommChecks(t task, id string) error {
 			fmt.Println("Making sure it does not stop unexpectedly...")
 		}
 
-		if job.Status == jobStatus.Stopped && runningTriggered {
+		stopped := job.Status == jobStatus.Stopped && runningTriggered
+		logsError := strings.Contains(logFile, "exited with code")
+
+		if stopped || logsError {
 			fmt.Println("Task stopped running! Error Message:")
 			fmt.Println(job.ErrMsg)
 
 			fmt.Println("Logs File:")
-			resp, code := post(payload, logsURL)
-			if code != statCode.Accepted {
-				log.Fatal("Something went wrong using the API!")
-				return errors.New("Bad API")
-			}
-			fmt.Println(resp.Message)
+			fmt.Println(logFile)
 			return errors.New("Bad Task")
 		}
 
-		if counter > 6 {
+		if counter > 15 {
 			fmt.Println("Task has started Properly!")
 			return nil
 		}

@@ -145,7 +145,7 @@ func (job *taskJob) DockerRun() *exec.Cmd {
 	handleAPI(err, job, string(out))
 
 	// Get logging Running
-	cmd := exec.Command("docker-compose", "-f", composeLoc, "up", "--no-color", "--abort-on-container-exit")
+	cmd := exec.Command("docker-compose", "-f", composeLoc, "up", "--no-color")
 
 	outfile, err := os.Create(logsLoc + "/info.log")
 	handleAPI(err, job, "Failed to create log file")
