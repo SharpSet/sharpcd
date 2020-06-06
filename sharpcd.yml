@@ -44,3 +44,10 @@ tasks:
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
     compose: /sharpcd/testing/testing/delayed.yml
+
+  Restart_task:
+    name: Test Log exit
+    type: docker
+    sharpurl: https://localhost:5666
+    giturl: https://raw.githubusercontent.com/Sharpz7/
+    compose: /sharpcd/testing/testing/restart.yml

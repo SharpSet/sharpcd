@@ -48,6 +48,7 @@ func client() {
 		body, code := post(payload, task.SharpURL)
 		if code == statCode.Accepted {
 			fmt.Printf("Task %s succesfully sent!\n\n", task.Name)
+			fmt.Println("=================")
 			err = postCommChecks(task, id)
 			if err != nil {
 				globalErr = true
@@ -159,10 +160,10 @@ func postCommChecks(t task, id string) error {
 			fmt.Println("Making sure it does not stop unexpectedly...")
 		}
 
-		stopped := job.Status == jobStatus.Stopped && runningTriggered
+		stopped := job.Status == jobStatus.Stopped
 		logsError := strings.Contains(logFile, "exited with code")
 
-		if stopped || logsError {
+		if (stopped || logsError) && runningTriggered{
 			fmt.Println("Task stopped running! Error Message:")
 			fmt.Println(job.ErrMsg)
 
