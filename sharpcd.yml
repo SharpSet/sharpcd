@@ -2,16 +2,45 @@ version: 1
 
 tasks:
   basic_task:
-    name: Testing Task V1
+    name: Basic Task
     type: docker
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
     compose: /sharpcd/testing/testing/basic.yml
 
   env_task:
-    name: Testing Task V1
+    name: Enviroment Test Fail
     type: docker
     envfile: .env
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
     compose: /sharpcd/testing/testing/env.yml
+
+  env_task2:
+    name: Enviroment Test Pass
+    type: docker
+    envfile: ./testing/.env
+    sharpurl: https://localhost:5666
+    giturl: https://raw.githubusercontent.com/Sharpz7/
+    compose: /sharpcd/testing/testing/env.yml
+
+  basic_task:
+    name: Basic Task 2
+    type: docker
+    sharpurl: https://localhost:5666
+    giturl: https://raw.githubusercontent.com/Sharpz7/
+    compose: /sharpcd/testing/testing/basic.yml
+
+  file_task:
+    name: No Compose File Task
+    type: docker
+    sharpurl: https://localhost:5666
+    giturl: https://raw.githubusercontent.com/Sharpz7/
+    compose: /sharpcd/testing/testing/basic
+
+  Delayed_task:
+    name: No Compose File Task
+    type: docker
+    sharpurl: https://localhost:5666
+    giturl: https://raw.githubusercontent.com/Sharpz7/
+    compose: /sharpcd/testing/testing/delayed.yml

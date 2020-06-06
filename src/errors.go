@@ -33,7 +33,7 @@ func handleStatus(e error, status int, passedChecks *int) {
 // checks for server err
 // Writes response to API call
 func handleAPI(e error, job *taskJob, msg string) {
-	if e != nil {
+	if e != nil && job.ErrMsg == "" {
 		job.ErrMsg = msg
 		job.Status = jobStatus.Errored
 	}

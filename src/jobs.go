@@ -33,7 +33,7 @@ func createJob(payload postData) {
 		Name: payload.Name,
 		Type: payload.Type,
 		URL:  payload.GitURL + payload.Compose}
-	
+
 	// Load Env Vars in
 	loadEnv(payload.Enviroment)
 
@@ -76,7 +76,7 @@ func (job *taskJob) Run() {
 	// Mark as Running
 	job.Status = jobStatus.Running
 	err := cmd.Run()
-	handleAPI(err, job, "Failed to Run Job")
+	handleAPI(err, job, "Job Exited With Error")
 
 	// When finished, mark as stopped
 	job.Status = jobStatus.Stopped
@@ -123,6 +123,8 @@ func (job *taskJob) DockerRun() *exec.Cmd {
 	logsLoc := folder.Logs + id
 	composeLoc := folder.Docker + id + "/docker-compose.yml"
 
+	job.Status = jobStatus.Building
+
 	// Make url, read the compose file
 	resp, err := http.Get(url)
 	handleAPI(err, job, "Failed to get compose URL")
@@ -136,16 +138,14 @@ func (job *taskJob) DockerRun() *exec.Cmd {
 	err = ioutil.WriteFile(composeLoc, file, 0777)
 	handleAPI(err, job, "Failed to write to file")
 
-	job.Status = jobStatus.Building
-
 	// Build Commands
-	err = exec.Command("docker-compose", "-f", composeLoc, "down").Run()
-	handleAPI(err, job, "Failed to restart docker job")
-	err = exec.Command("docker-compose", "-f", composeLoc, "pull").Run()
-	handleAPI(err, job, "Failed to Pull New images for docker job")
+	out, err := exec.Command("docker-compose", "-f", composeLoc, "down").CombinedOutput()
+	handleAPI(err, job, string(out))
+	out, err = exec.Command("docker-compose", "-f", composeLoc, "pull").CombinedOutput()
+	handleAPI(err, job, string(out))
 
 	// Get logging Running
-	cmd := exec.Command("docker-compose", "-f", composeLoc, "up", "--no-color")
+	cmd := exec.Command("docker-compose", "-f", composeLoc, "up", "--no-color", "--abort-on-container-exit")
 
 	outfile, err := os.Create(logsLoc + "/info.log")
 	handleAPI(err, job, "Failed to create log file")

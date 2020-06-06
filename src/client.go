@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -16,6 +18,8 @@ import (
 )
 
 func client() {
+
+	var globalErr bool
 
 	// Get config, get data from it
 	f, err := ioutil.ReadFile("./sharpcd.yml")
@@ -44,12 +48,21 @@ func client() {
 		body, code := post(payload, task.SharpURL)
 		if code == statCode.Accepted {
 			fmt.Printf("Task %s succesfully sent!\n\n", task.Name)
-			postCommChecks(task, id)
+			err = postCommChecks(task, id)
+			if err != nil {
+				globalErr = true
+			}
+			fmt.Println("")
 			fmt.Println("")
 		} else {
 			fmt.Println(body.Message)
 			fmt.Printf("Task %s Failed!\n\n", task.Name)
 		}
+	}
+
+	if globalErr {
+		fmt.Println("At least one task Failed!")
+		os.Exit(1)
 	}
 }
 
@@ -103,8 +116,9 @@ func getEnviroment(loc string) map[string]string {
 	return env
 }
 
-func postCommChecks(t task, id string) {
+func postCommChecks(t task, id string) error {
 	jobURL := t.SharpURL + "/api/job/" + id
+	logsURL := t.SharpURL + "/api/logs/" + id
 	payload := postData{
 		Secret: getSec()}
 	buildingTriggered := false
@@ -118,7 +132,7 @@ func postCommChecks(t task, id string) {
 		resp, code := post(payload, jobURL)
 		if code != statCode.Accepted {
 			log.Fatal("Something went wrong using the API!")
-			break
+			return errors.New("Bad API")
 		}
 
 		job := resp.Job
@@ -140,13 +154,22 @@ func postCommChecks(t task, id string) {
 		}
 
 		if job.Status == jobStatus.Stopped && runningTriggered {
-			fmt.Println("Task stopped running! Please Check its logs")
-			break
+			fmt.Println("Task stopped running! Error Message:")
+			fmt.Println(job.ErrMsg)
+
+			fmt.Println("Logs File:")
+			resp, code := post(payload, logsURL)
+			if code != statCode.Accepted {
+				log.Fatal("Something went wrong using the API!")
+				return errors.New("Bad API")
+			}
+			fmt.Println(resp.Message)
+			return errors.New("Bad Task")
 		}
 
 		if counter > 6 {
 			fmt.Println("Task has started Properly!")
-			break
+			return nil
 		}
 
 		if runningTriggered {
