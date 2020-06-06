@@ -45,6 +45,7 @@ func client() {
 		if code == statCode.Accepted {
 			fmt.Printf("Task %s succesfully sent!\n\n", task.Name)
 			postCommChecks(task, id)
+			fmt.Println("")
 		} else {
 			fmt.Println(body.Message)
 			fmt.Printf("Task %s Failed!\n\n", task.Name)
@@ -108,6 +109,8 @@ func postCommChecks(t task, id string) {
 		Secret: getSec()}
 	buildingTriggered := false
 	stoppingTriggered := false
+	runningTriggered := false
+	counter := 0
 
 	fmt.Println("Waiting on server response...")
 	time.Sleep(2 * time.Second)
@@ -130,12 +133,26 @@ func postCommChecks(t task, id string) {
 			fmt.Println("The Task is now building a job")
 		}
 
-		if job.Status == jobStatus.Running {
+		if job.Status == jobStatus.Running && !runningTriggered {
+			runningTriggered = true
+			fmt.Println("Task Has Successfully started running!")
+			fmt.Println("Making sure it does not stop unexpectedly...")
+		}
+
+		if job.Status == jobStatus.Stopped && runningTriggered {
+			fmt.Println("Task stopped running! Please Check its logs")
 			break
+		}
+
+		if counter > 6 {
+			fmt.Println("Task has started Properly!")
+			break
+		}
+
+		if runningTriggered {
+			counter++
 		}
 
 		time.Sleep(1 * time.Second)
 	}
-
-	fmt.Println("Task Has Successfully started running!")
 }
