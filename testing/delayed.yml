@@ -2,4 +2,4 @@ version: '3'
 services:
   hello_world:
     image: ubuntu
-    command: echo "Hello World" && sleep 5
+    command: ["/bin/sh", "-c", "echo Hello && sleep 4"]

@@ -1,0 +1,6 @@
+version: '3'
+services:
+  hello_world:
+    image: ubuntu
+    command: ["/bin/sh", "-c", "echo Hello && sleep 4"]
+    restart: always
