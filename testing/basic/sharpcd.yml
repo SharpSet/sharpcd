@@ -1,10 +1,9 @@
 version: 1
 
 tasks:
-
-  sharpcd_task:
+  basic_task:
     name: Testing Task V1
     type: docker
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/testing/.circleci/docker-compose.yml
+    compose: /sharpcd/testing/testing/basic/docker-compose.yml

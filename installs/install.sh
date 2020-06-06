@@ -1,7 +1,11 @@
 #/bin/bash
 
+echo "Installing required modules"
+sudo apt-get install -y lsof
+
 # Uninstall any previous versions.
 echo "Checking for any previous version..."
+sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
 sudo rm -r /usr/local/bin/sharpcd /usr/local/bin/sharpcd-data
 sudo rm /etc/systemd/system/sharpcd.service
 sudo systemctl daemon-reload
