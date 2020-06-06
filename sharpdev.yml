@@ -22,6 +22,8 @@ scripts:
     sharpdev build &&
     ./internal/sharpcd --secret Secret123
 
+  job: curl -k -X POST -d SECRET https://localhost:5666/api/job/${SHARP_ARG_1}
+  logs: curl -k -X POST -d SECRET https://localhost:5666/api/logs/${SHARP_ARG_1}
   filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
   remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/
 

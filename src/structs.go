@@ -37,12 +37,13 @@ var jobStatus = jobStats{
 	Stopping: "stopping"}
 
 type taskJob struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Type   string `json:"type"`
-	Status string `json:"status"`
-	ErrMsg string `json:"err_msg"`
-	URL    string `json:"url"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+	Status     string `json:"status"`
+	ErrMsg     string `json:"err_msg"`
+	URL        string `json:"url"`
+	Enviroment map[string]string
 }
 
 type allTaskJobs struct {

@@ -32,10 +32,8 @@ func createJob(payload postData) {
 	newJob := taskJob{
 		Name: payload.Name,
 		Type: payload.Type,
-		URL:  payload.GitURL + payload.Compose}
-
-	// Load Env Vars in
-	loadEnv(payload.Enviroment)
+		URL:  payload.GitURL + payload.Compose,
+		Enviroment: payload.Enviroment}
 
 	// If a job with that ID already exists
 	if job := getJob(payload.ID); job != nil {
@@ -44,7 +42,6 @@ func createJob(payload postData) {
 		newJob.ID = job.ID
 
 		// Stop the old job
-		job.Status = jobStatus.Stopping
 		job.Stop()
 
 		// Replace and run the new job
@@ -70,22 +67,29 @@ func (job *taskJob) Run() {
 	// Run the correct job Type
 	switch job.Type {
 	case "docker":
-		cmd = job.DockerRun()
+		cmd = job.DockerCmd()
 	}
 
-	// Mark as Running
-	job.Status = jobStatus.Running
-	err := cmd.Run()
-	handleAPI(err, job, "Job Exited With Error")
+	// If setting up the command went fine
+	if job.Status != jobStatus.Errored {
 
-	// When finished, mark as stopped
-	job.Status = jobStatus.Stopped
+		// Run Command
+		job.Status = jobStatus.Running
+		err := cmd.Run()
+		handleAPI(err, job, "Job Exited With Error")
+
+		// When finished, mark as stopped
+		job.Status = jobStatus.Stopped
+	}
 }
 
 // Stop a job Task
 func (job *taskJob) Stop() {
 
 	var cmd *exec.Cmd
+
+	// Mark Job as stopping, Clear error Message
+	job.Status = jobStatus.Stopping
 
 	// Makes sure to run the correct stop sequence
 	switch job.Type {
@@ -107,23 +111,14 @@ func (job *taskJob) DockerStop() *exec.Cmd {
 	return cmd
 }
 
-// Load in Enviroment from postData
-func loadEnv(data map[string]string) {
-	for key, val := range data {
-		os.Setenv(key, val)
-	}
-}
-
-// Run sequence for a Docker job
-func (job *taskJob) DockerRun() *exec.Cmd {
+// Get cmd for a Docker Job
+func (job *taskJob) DockerCmd() *exec.Cmd {
 
 	// All Location Data
 	id := job.ID
 	url := job.URL
 	logsLoc := folder.Logs + id
 	composeLoc := folder.Docker + id + "/docker-compose.yml"
-
-	job.Status = jobStatus.Building
 
 	// Make url, read the compose file
 	resp, err := http.Get(url)
@@ -133,14 +128,21 @@ func (job *taskJob) DockerRun() *exec.Cmd {
 	handleAPI(err, job, "Failed to read compose file")
 
 	// Make directory for docker and logs and save file
-	os.Mkdir(folder.Docker + id, 0777)
+	os.Mkdir(folder.Docker+id, 0777)
 	os.Mkdir(logsLoc, 0777)
 	err = ioutil.WriteFile(composeLoc, file, 0777)
 	handleAPI(err, job, "Failed to write to file")
 
-	// Build Commands
+
+	// Remove any previous containers
 	out, err := exec.Command("docker-compose", "-f", composeLoc, "down").CombinedOutput()
 	handleAPI(err, job, string(out))
+
+	// Make sure Config Is valid
+	out, err = exec.Command("docker-compose", "-f", composeLoc, "config").CombinedOutput()
+	handleAPI(err, job, string(out))
+
+	// pull lastest images
 	out, err = exec.Command("docker-compose", "-f", composeLoc, "pull").CombinedOutput()
 	handleAPI(err, job, string(out))
 
@@ -149,8 +151,19 @@ func (job *taskJob) DockerRun() *exec.Cmd {
 
 	outfile, err := os.Create(logsLoc + "/info.log")
 	handleAPI(err, job, "Failed to create log file")
-	cmd.Env = os.Environ()
+	cmd.Env = job.insertEnviroment()
 	cmd.Stdout = outfile
 
 	return cmd
+}
+
+func (job *taskJob) insertEnviroment() []string {
+	var environ []string
+
+	for key, val := range job.Enviroment {
+		str := key + "=" + val
+		environ = append(environ, str)
+	}
+
+	return environ
 }
