@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"time"
 )
 
 // Pointer to variable storing all jobs
@@ -30,9 +31,9 @@ func createJob(payload postData) {
 
 	// Stores info on the job from the task
 	newJob := taskJob{
-		Name: payload.Name,
-		Type: payload.Type,
-		URL:  payload.GitURL + payload.Compose,
+		Name:       payload.Name,
+		Type:       payload.Type,
+		URL:        payload.GitURL + payload.Compose,
 		Enviroment: payload.Enviroment}
 
 	// If a job with that ID already exists
@@ -75,6 +76,7 @@ func (job *taskJob) Run() {
 
 		// Run Command
 		job.Status = jobStatus.Running
+
 		err := cmd.Run()
 		handleAPI(err, job, "Job Exited With Error")
 
@@ -99,6 +101,9 @@ func (job *taskJob) Stop() {
 
 	err := cmd.Run()
 	handleAPI(err, job, "Failed to Stop Job")
+
+	// Sleeps to API can pick it up
+	time.Sleep(2 * time.Second)
 }
 
 // Stop sequence for a docker job
@@ -107,6 +112,7 @@ func (job *taskJob) DockerStop() *exec.Cmd {
 
 	// Stopping the container
 	cmd := exec.Command("docker-compose", "-f", composeLoc, "down")
+	cmd.Env = job.insertEnviroment()
 
 	return cmd
 }
@@ -133,18 +139,12 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	err = ioutil.WriteFile(composeLoc, file, 0777)
 	handleAPI(err, job, "Failed to write to file")
 
-
 	// Remove any previous containers
-	out, err := exec.Command("docker-compose", "-f", composeLoc, "down").CombinedOutput()
-	handleAPI(err, job, string(out))
-
-	// Make sure Config Is valid
-	out, err = exec.Command("docker-compose", "-f", composeLoc, "config").CombinedOutput()
-	handleAPI(err, job, string(out))
-
-	// pull lastest images
-	out, err = exec.Command("docker-compose", "-f", composeLoc, "pull").CombinedOutput()
-	handleAPI(err, job, string(out))
+	job.buildCommand("-f", composeLoc, "down")
+	// Make sure config is valid
+	job.buildCommand("-f", composeLoc, "config")
+	// Pull new images
+	job.buildCommand("-f", composeLoc, "pull")
 
 	// Get logging Running
 	cmd := exec.Command("docker-compose", "-f", composeLoc, "up", "--no-color")
@@ -165,5 +165,12 @@ func (job *taskJob) insertEnviroment() []string {
 		environ = append(environ, str)
 	}
 
-	return environ
+	return append(os.Environ(), environ...)
+}
+
+func (job *taskJob) buildCommand(args ...string) {
+	cmd := exec.Command("docker-compose", args...)
+	cmd.Env = job.insertEnviroment()
+	out, err := cmd.CombinedOutput()
+	handleAPI(err, job, string(out))
 }

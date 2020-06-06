@@ -164,12 +164,14 @@ func postCommChecks(t task, id string) error {
 		errored := job.Status == jobStatus.Errored
 		logsError := strings.Contains(logFile, "exited with code")
 
-		if ((stopped || logsError) && buildingTriggered) || errored {
+		if ((stopped || logsError) && runningTriggered) || errored {
 			fmt.Println("Task stopped running! Error Message:")
 			fmt.Println(job.ErrMsg)
 
-			fmt.Println("Logs File:")
-			fmt.Println(logFile)
+			if runningTriggered {
+				fmt.Println("Logs File:")
+				fmt.Println(logFile)
+			}
 			return errors.New("Bad Task")
 		}
 

@@ -26,4 +26,5 @@ scripts:
   logs: curl -k -X POST -d SECRET https://localhost:5666/api/logs/${SHARP_ARG_1}
   filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
   remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/
+  alljobs: curl -k -X POST -d SECRET https://localhost:5666/api/jobs
 
