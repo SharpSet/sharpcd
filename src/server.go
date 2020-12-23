@@ -1,36 +1,48 @@
 package main
 
 import (
-	"encoding/json"
+	"crypto/tls"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
-type response struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
+var certLoc = folder.Private + "/server.crt"
+var keyLoc = folder.Private + "/server.key"
 
 func server() {
-	http.HandleFunc("/", command)
-	log.Fatal(http.ListenAndServe(":5666", nil))
-}
+	// Check if keys have been created
+	_, err := os.Stat(certLoc)
+	_, err = os.Stat(keyLoc)
+	handle(err, "Failed to load openssl keys")
 
-// Takes a command with POST data
-func command(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
 
-	switch r.Method {
+	// Handler Functions
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", httpHandleTask)
+	mux.HandleFunc("/api/", httpHandleAPI)
 
-	case "POST":
-		text := response{
-			Name: "Adam McArthur",
-			Value: "Succesful Attempt!",
-		}
-		json.NewEncoder(w).Encode(text)
-		return
-	default:
-		http.Error(w, "Sorry, SharpCD can only take POST requests.", 422)
-		return
+	// Set config for better security
+	cfg := &tls.Config{
+		MinVersion:               tls.VersionTLS12,
+		CurvePreferences:         []tls.CurveID{tls.CurveP521, tls.CurveP384, tls.CurveP256},
+		PreferServerCipherSuites: true,
+		CipherSuites: []uint16{
+			tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+			tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
+		},
 	}
+
+	// Run server
+	srv := &http.Server{
+		Addr:         ":5666",
+		Handler:      mux,
+		TLSConfig:    cfg,
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler), 0),
+	}
+	fmt.Println("Server Successfully Running!")
+	log.Fatal(srv.ListenAndServeTLS(certLoc, keyLoc))
 }

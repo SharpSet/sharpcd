@@ -1,0 +1,30 @@
+version: 0.1
+envfile: .env
+
+values:
+  SECRET: '{\"secret\":\"Secret123\"}'
+
+scripts:
+  build: go build -o ./internal/sharpcd ./src
+  revert: git revert ${SHARP_ARG_1}..HEAD
+  list: git branch
+  archive: |
+   git tag archive/${SHARP_ARG_1} ${SHARP_ARG_1} &&
+   git branch -d ${SHARP_ARG_1}
+
+  server: |
+    sudo apt-get install -y lsof &&
+    sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true &&
+    sharpdev build &&
+    sudo ./internal/sharpcd server &
+
+  client: |
+    sharpdev build &&
+    ./internal/sharpcd --secret Secret123
+
+  job: curl -k -X POST -d SECRET https://localhost:5666/api/job/${SHARP_ARG_1}
+  logs: curl -k -X POST -d SECRET https://localhost:5666/api/logs/${SHARP_ARG_1}
+  filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
+  remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/
+  alljobs: curl -k -X POST -d SECRET https://localhost:5666/api/jobs
+

@@ -1,0 +1,8 @@
+goversion: "1.12"
+packages:
+- gopkg.in/yaml.v2
+- golang.org/x/crypto/bcrypt
+- github.com/joho/godotenv
+- golang.org/x/term
+devpackages:
+- golang.org/x/sys/unix

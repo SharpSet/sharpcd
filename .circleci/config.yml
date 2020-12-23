@@ -1,38 +1,20 @@
-version: 2
+version: 2.1
 
-variables:
-  DOCKER_DRIVER: overlay2
+orbs:
+  release: sharptools/release@0.0.3
+  go: sharptools/go@0.0.5
 
-jobs:
-  test:
-    docker:
-      - image: sharp6292/ci-gopack:0.0.1a
-
-    steps:
-      - checkout
-
-      - run:
-          name: compile
-          command: |
-            go build -o "sharpcd" ./src
-
-          environment:
-            GOOS: "linux"
-
-      - run:
-          name: run_server
-          command: |
-            ./sharpcd server </dev/null &>/dev/null &
-
-            wget -qO- --post-data "" localhost:5666
-
-     - run:
-          name: run_server
-          command: |
-            wget -qO- --post-data "" localhost:5666
 
 workflows:
-  version: 2
   workflow:
     jobs:
-      - test
+      - go/package:
+          appname: sharpcd
+
+      - release/github_job:
+          context: General
+          requires:
+            - go/package
+          filters:
+            branches:
+              only: testing
