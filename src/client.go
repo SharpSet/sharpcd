@@ -135,43 +135,47 @@ func postCommChecks(t task, id string) error {
 			log.Fatal("Something went wrong using the API!")
 			return errors.New("Bad API")
 		}
-		resp2, code := post(payload, logsURL)
-		if code != statCode.Accepted {
-			log.Fatal("Something went wrong using the API!")
-			return errors.New("Bad API")
-		}
 
 		job := resp.Job
-		logFile := resp2.Message
 
-		if job.Status == jobStatus.Stopping && !stoppingTriggered {
+		stopped := job.Status == jobStatus.Stopped && runningTriggered
+		errored := job.Status == jobStatus.Errored
+		building := job.Status == jobStatus.Building && !buildingTriggered
+		running := job.Status == jobStatus.Running && !runningTriggered
+		stopping := job.Status == jobStatus.Stopping && !stoppingTriggered
+
+		if stopping {
 			stoppingTriggered = true
 			fmt.Println("The Task already exists on server. Stopping old job...")
 		}
 
-		if job.Status == jobStatus.Building && !buildingTriggered {
+		if building {
 			buildingTriggered = true
 			fmt.Println("The Task is now building a job")
 		}
 
-		if job.Status == jobStatus.Running && !runningTriggered {
+		if running {
 			runningTriggered = true
 			fmt.Println("Task Has Successfully started running!")
 			fmt.Println("Making sure it does not stop unexpectedly...")
 		}
 
-		stopped := job.Status == jobStatus.Stopped
-		errored := job.Status == jobStatus.Errored
-		logsError := strings.Contains(logFile, "exited with code")
+		if errored || stopped {
+			fmt.Println("Task stopped running!")
+			fmt.Println("Error Message: " + job.ErrMsg)
 
-		if ((stopped || logsError) && runningTriggered) || errored {
-			fmt.Println("Task stopped running! Error Message:")
-			fmt.Println(job.ErrMsg)
-
-			if runningTriggered {
-				fmt.Println("Logs File:")
-				fmt.Println(logFile)
+			logResp, code := post(payload, logsURL)
+			if code != statCode.Accepted {
+				log.Fatal("Something went wrong using the API!")
+				return errors.New("Bad API")
 			}
+			file := logResp.Message
+
+			if file != "" {
+				fmt.Println("Logs File:")
+				fmt.Println(file)
+			}
+
 			return errors.New("Bad Task")
 		}
 

@@ -51,9 +51,20 @@ func getJobs(path string) (*taskJob, error) {
 
 	for _, job := range allJobs.List {
 		if job.ID == path {
-			return job, nil
+			err := checkJobStatus(job)
+			return job, err
 		}
 	}
 
 	return emptyJob, errors.New("job not found")
+}
+
+func checkJobStatus(job *taskJob) error {
+	logs, err := getLogs(job.ID)
+	if strings.Contains(logs, "exited with code") {
+		job.Status = jobStatus.Errored
+		job.ErrMsg = "A Container exited unexpectedly"
+	}
+
+	return err
 }
