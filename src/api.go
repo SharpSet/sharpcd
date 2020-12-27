@@ -62,7 +62,7 @@ func getJobs(path string) (*taskJob, error) {
 func checkJobStatus(job *taskJob) error {
 	logs, err := getLogs(job.ID)
 	if strings.Contains(logs, "exited with code") {
-		job.Status = jobStatus.Errored
+		job.Status = jobStatus.Stopped
 		job.ErrMsg = "A Container exited unexpectedly"
 	}
 

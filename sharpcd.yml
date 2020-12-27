@@ -6,7 +6,7 @@ tasks:
     type: docker
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/testing/testing/basic.yml
+    compose: /sharpcd/master/testing/basic.yml
 
   env_task:
     name: Enviroment Test Fail
@@ -14,7 +14,14 @@ tasks:
     envfile: .env
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/testing/testing/env.yml
+    compose: /sharpcd/master/testing/env.yml
+
+  network_task:
+    name: Network Test Fail
+    type: docker
+    sharpurl: https://localhost:5666
+    giturl: https://raw.githubusercontent.com/Sharpz7/
+    compose: /sharpcd/master/testing/network.yml
 
   env_task2:
     name: Enviroment Test Pass
@@ -22,32 +29,25 @@ tasks:
     envfile: ./testing/.env
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/testing/testing/env.yml
-
-  basic_task:
-    name: Basic 2
-    type: docker
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/testing/testing/basic.yml
+    compose: /sharpcd/master/testing/env.yml
 
   file_task:
     name: No Compose File
     type: docker
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/testing/testing/basic
+    compose: /sharpcd/master/testing/basic
 
   Delayed_task:
     name: Delayed stop
     type: docker
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/testing/testing/delayed.yml
+    compose: /sharpcd/master/testing/delayed.yml
 
   Restart_task:
     name: Test Log exit
     type: docker
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/testing/testing/restart.yml
+    compose: /sharpcd/master/testing/restart.yml
