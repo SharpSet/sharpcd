@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
+	"strings"
 	"time"
 )
 
@@ -139,10 +141,10 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	err = ioutil.WriteFile(composeLoc, file, 0777)
 	handleAPI(err, job, "Failed to write to file")
 
+	// Make sure config is valid
+	job.buildCommand("-f", composeLoc, "up", "-d")
 	// Remove any previous containers
 	job.buildCommand("-f", composeLoc, "down")
-	// Make sure config is valid
-	job.buildCommand("-f", composeLoc, "config")
 	// Pull new images
 	job.buildCommand("-f", composeLoc, "pull")
 
@@ -169,8 +171,31 @@ func (job *taskJob) insertEnviroment() []string {
 }
 
 func (job *taskJob) buildCommand(args ...string) {
+	var errMsg string
 	cmd := exec.Command("docker-compose", args...)
 	cmd.Env = job.insertEnviroment()
 	out, err := cmd.CombinedOutput()
-	handleAPI(err, job, string(out))
+
+	// Add conditions for volumes and networks
+	if strings.Contains(string(out), "404") {
+		errMsg = "No Compose File Found!"
+		handleAPI(err, job, errMsg)
+	} else if strings.Contains(string(out), "manually using `") {
+
+		// Find Docker Command
+		re := regexp.MustCompile("`(.*)`")
+		command := strings.ReplaceAll(string(re.Find(out)), "`", "")
+		commands := strings.Split(command, " ")
+
+		// Create Missing Element
+		cmd := exec.Command(commands[0], commands[1:]...)
+
+		// Handle Errors
+		out, err := cmd.CombinedOutput()
+		handleAPI(err, job, string(out))
+	} else {
+		errMsg = string(out)
+		handleAPI(err, job, errMsg)
+	}
+
 }

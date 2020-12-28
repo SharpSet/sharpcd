@@ -1,0 +1,17 @@
+version: '3'
+services:
+  hello_world:
+    image: ubuntu
+    command: tail -f /dev/null
+
+    volumes:
+      - "memes:/test"
+
+networks:
+  default:
+      external:
+          name: memes
+
+volumes:
+  memes:
+    external: True

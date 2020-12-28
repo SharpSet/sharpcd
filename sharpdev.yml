@@ -16,9 +16,12 @@ scripts:
     sudo apt-get install -y lsof &&
     sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true &&
     sharpdev build &&
-    sudo ./internal/sharpcd server &
+    sudo ./internal/sharpcd server
 
   client: |
+    sudo docker-compose -f "./testing/external.yml" down &&
+    sudo docker volume rm memes &&
+    sudo docker network rm memes &&
     sharpdev build &&
     ./internal/sharpcd --secret Secret123
 
