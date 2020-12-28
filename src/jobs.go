@@ -182,17 +182,27 @@ func (job *taskJob) buildCommand(args ...string) {
 		handleAPI(err, job, errMsg)
 	} else if strings.Contains(string(out), "manually using `") {
 
-		// Find Docker Command
-		re := regexp.MustCompile("`(.*)`")
-		command := strings.ReplaceAll(string(re.Find(out)), "`", "")
-		commands := strings.Split(command, " ")
+		for {
+			cmd := exec.Command("docker-compose", args...)
+			out, err = cmd.CombinedOutput()
 
-		// Create Missing Element
-		cmd := exec.Command(commands[0], commands[1:]...)
+			if strings.Contains(string(out), "manually using `") {
+				// Find Docker Command
+				re := regexp.MustCompile("`(.*)`")
+				command := strings.ReplaceAll(string(re.Find(out)), "`", "")
+				commands := strings.Split(command, " ")
 
-		// Handle Errors
-		out, err := cmd.CombinedOutput()
-		handleAPI(err, job, string(out))
+				// Create Missing Element
+				cmd := exec.Command(commands[0], commands[1:]...)
+
+				// Handle Errors
+				out, err := cmd.CombinedOutput()
+				handleAPI(err, job, string(out))
+			} else {
+				break
+			}
+		}
+
 	} else {
 		errMsg = string(out)
 		handleAPI(err, job, errMsg)

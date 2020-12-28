@@ -136,6 +136,8 @@ func postCommChecks(t task, id string) error {
 			return errors.New("Bad API")
 		}
 
+		time.Sleep(1 * time.Second)
+
 		job := resp.Job
 
 		stopped := job.Status == jobStatus.Stopped && runningTriggered
@@ -179,7 +181,7 @@ func postCommChecks(t task, id string) error {
 			return errors.New("Bad Task")
 		}
 
-		if counter > 15 {
+		if counter > 5 {
 			fmt.Println("Task has started Properly!")
 			return nil
 		}

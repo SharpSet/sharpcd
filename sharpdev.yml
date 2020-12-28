@@ -19,9 +19,9 @@ scripts:
     sudo ./internal/sharpcd server
 
   client: |
-    sudo docker-compose -f "./testing/external.yml" down &&
-    sudo docker volume rm memes &&
-    sudo docker network rm memes &&
+    sudo docker-compose -f "./internal/sharpcd-data/docker/external_task/docker-compose.yml" down &&
+    $(sudo docker volume rm memes) > /dev/null 2>&1 || true &&
+    $(sudo docker network rm memes) > /dev/null 2>&1 || true &&
     sharpdev build &&
     ./internal/sharpcd --secret Secret123
 
