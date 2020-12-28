@@ -17,4 +17,4 @@ workflows:
             - go/package
           filters:
             branches:
-              only: testing
+              only: master
