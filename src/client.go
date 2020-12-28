@@ -128,7 +128,6 @@ func postCommChecks(t task, id string) error {
 	counter := 0
 
 	fmt.Println("Waiting on server response...")
-	time.Sleep(2 * time.Second)
 	for {
 		resp, code := post(payload, jobURL)
 		if code != statCode.Accepted {
@@ -136,8 +135,9 @@ func postCommChecks(t task, id string) error {
 			return errors.New("Bad API")
 		}
 
-		time.Sleep(1 * time.Second)
-
+		if resp.Job == nil {
+			continue
+		}
 		job := resp.Job
 
 		stopped := job.Status == jobStatus.Stopped && runningTriggered
