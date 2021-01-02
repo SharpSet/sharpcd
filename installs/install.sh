@@ -19,6 +19,8 @@ rm -r linux.tar.gz
 if !(grep -c '^sharpcd:' /etc/passwd) then
     sudo chown sharpcd:sharpcd /usr/local/bin/docker-compose
     sudo useradd sharpcd
+    sudo mkdir /home/sharpcd
+    sudo chown -R sharpcd:sharpcd /home/sharpcd
     sudo groupadd docker
     sudo usermod -aG docker sharpcd
     sudo systemctl restart docker
