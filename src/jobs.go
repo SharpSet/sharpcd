@@ -102,8 +102,8 @@ func (job *taskJob) Stop() {
 		cmd = job.DockerStop()
 	}
 
-	out, err := cmd.CombinedOutput()
-	handleAPI(err, job, string(out))
+	err := cmd.Run()
+	handleAPI(err, job, "Failed to Stop Job")
 
 	// Sleeps to API can pick it up
 	time.Sleep(2 * time.Second)
