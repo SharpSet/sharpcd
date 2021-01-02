@@ -128,9 +128,24 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	logsLoc := folder.Logs + id
 	composeLoc := folder.Docker + id + "/docker-compose.yml"
 
+	// Get github token
+	f, err := readFilter()
+	if err != nil {
+		handleAPI(err, job, "Failed to get Token")
+	}
+
 	// Make url, read the compose file
-	resp, err := http.Get(url)
-	handleAPI(err, job, "Failed to get compose URL")
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		handleAPI(err, job, "Failed to build request")
+	}
+	req.Header.Set("Authorization", f.Token)
+	req.Header.Set("Accept", "application/vnd.github.v3.raw")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		handleAPI(err, job, "Failed to get compose URL")
+	}
 	defer resp.Body.Close()
 	file, err := ioutil.ReadAll(resp.Body)
 	handleAPI(err, job, "Failed to read compose file")
@@ -150,7 +165,6 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 
 	// Get logging Running
 	cmd := exec.Command("docker-compose", "-f", composeLoc, "up", "--no-color")
-
 	outfile, err := os.Create(logsLoc + "/info.log")
 	handleAPI(err, job, "Failed to create log file")
 	cmd.Env = job.insertEnviroment()

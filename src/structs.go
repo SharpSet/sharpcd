@@ -79,6 +79,7 @@ type config struct {
 
 type filter struct {
 	Allowed []string
+	Token   string
 }
 
 type response struct {

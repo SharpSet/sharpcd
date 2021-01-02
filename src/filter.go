@@ -24,6 +24,20 @@ func addFilter() {
 	handle(err, "Failed to save filter.yml")
 }
 
+// Changes the Token
+func changeToken() {
+	token := flag.Args()[1]
+
+	// Reads filter.yml
+	f, err := readFilter()
+	handle(err, "Failed to read token file")
+
+	// Adds in new allowed url and saves
+	f.Token = token
+	err = saveFilter(f)
+	handle(err, "Failed to save token file")
+}
+
 // Removes a url to filter.yml
 func removeFilter() {
 	targetURL := flag.Args()[1]

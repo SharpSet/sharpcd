@@ -9,6 +9,7 @@ import (
 )
 
 var secretFlag string
+var tokenFlag string
 
 // Create Flags needed
 func init() {
@@ -22,6 +23,7 @@ Args of SharpCD:
 	- server: Run the sharpcd server
 	- setsecret: Set the secret for API and Task Calls
 	- addfilter: Add a url for a compose file
+	- changetoken: Add a token for private github repos
 	- removefilter: Remove a url for a compose file
 
 This will read the sharpdev.yml file
@@ -50,6 +52,8 @@ func main() {
 			addFilter()
 		case "removefilter":
 			removeFilter()
+		case "changetoken":
+			changeToken()
 		default:
 			log.Fatal("This subcommand does not exist!")
 		}
