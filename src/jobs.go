@@ -36,7 +36,8 @@ func createJob(payload postData) {
 		Name:       payload.Name,
 		Type:       payload.Type,
 		URL:        payload.GitURL + payload.Compose,
-		Enviroment: payload.Enviroment}
+		Enviroment: payload.Enviroment,
+		Registry:   payload.Registry}
 
 	// If a job with that ID already exists
 	if job := getJob(payload.ID); job != nil {
@@ -156,6 +157,10 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	err = ioutil.WriteFile(composeLoc, file, 0777)
 	handleAPI(err, job, "Failed to write to file")
 
+	if job.Registry != "" {
+		job.dockerLogin()
+	}
+
 	// Make sure config is valid
 	job.buildCommand("-f", composeLoc, "up", "-d")
 	// Remove any previous containers
@@ -182,6 +187,14 @@ func (job *taskJob) insertEnviroment() []string {
 	}
 
 	return append(os.Environ(), environ...)
+}
+
+func (job *taskJob) dockerLogin() {
+	cmd := exec.Command("docker", "login", job.Registry, "-u", job.Enviroment["DOCKER_USER"], "-p", job.Enviroment["DOCKER_PASS"])
+	cmd.Env = job.insertEnviroment()
+	out, err := cmd.CombinedOutput()
+	errMsg := string(out)
+	handleAPI(err, job, errMsg)
 }
 
 func (job *taskJob) buildCommand(args ...string) {

@@ -44,6 +44,7 @@ type taskJob struct {
 	ErrMsg     string            `json:"err_msg"`
 	URL        string            `json:"url"`
 	Enviroment map[string]string `json:"-"`
+	Registry   string            `json:"registry"`
 }
 
 type allTaskJobs struct {
@@ -59,6 +60,7 @@ type postData struct {
 	Enviroment map[string]string `json:"enviroment"`
 	Secret     string            `json:"secret"`
 	Compose    string            `json:"compose"`
+	Registry   string            `json:"registry"`
 }
 
 type task struct {
@@ -70,6 +72,7 @@ type task struct {
 	GitURL   string
 	Command  string
 	Compose  string
+	Registry string
 }
 
 type config struct {

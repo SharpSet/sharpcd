@@ -1,5 +1,5 @@
 version: '3'
 services:
   hello_world:
-    image: ubuntu
+    image: docker.mcaq.me/stuandbob
     command: tail -f /dev/null

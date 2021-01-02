@@ -42,6 +42,7 @@ func client() {
 			Command:    task.Command,
 			Compose:    task.Compose,
 			Enviroment: getEnviroment(task.Envfile),
+			Registry:   task.Registry,
 			Secret:     getSec()}
 
 		// Make POST request and let user know if successful
