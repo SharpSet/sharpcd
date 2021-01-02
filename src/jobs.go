@@ -191,7 +191,6 @@ func (job *taskJob) insertEnviroment() []string {
 
 func (job *taskJob) dockerLogin() {
 	cmd := exec.Command("docker", "login", job.Registry, "-u", job.Enviroment["DOCKER_USER"], "-p", job.Enviroment["DOCKER_PASS"])
-	cmd.Env = job.insertEnviroment()
 	out, err := cmd.CombinedOutput()
 	errMsg := string(out)
 	handleAPI(err, job, errMsg)
