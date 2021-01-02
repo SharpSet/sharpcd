@@ -17,6 +17,7 @@ rm -r linux.tar.gz
 
 # Create SharpCD User
 if !(grep -c '^sharpcd:' /etc/passwd) then
+    sudo chown sharpcd:sharpcd /usr/local/bin/docker-compose
     sudo useradd sharpcd
     sudo groupadd docker
     sudo usermod -aG docker sharpcd
