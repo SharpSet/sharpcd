@@ -12,6 +12,7 @@ tasks:
     name: Registry
     type: docker
     registry: docker.mcaq.me
+    envfile: .env
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
     compose: /sharpcd/master/testing/registry.yml

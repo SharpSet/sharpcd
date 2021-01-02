@@ -45,6 +45,8 @@ func client() {
 			Registry:   task.Registry,
 			Secret:     getSec()}
 
+		fmt.Println(payload.Enviroment)
+
 		// Make POST request and let user know if successful
 		body, code := post(payload, task.SharpURL)
 		if code == statCode.Accepted {
