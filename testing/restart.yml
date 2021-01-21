@@ -6,5 +6,5 @@ services:
 
   hello_world2:
     image: ubuntu
-    command: ["/bin/sh", "-c", "echo Hello && sleep 4 && exit 137"]
+    command: ["/bin/sh", "-c", "echo Hello && sleep 4 && exit 2"]
     restart: always
