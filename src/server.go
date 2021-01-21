@@ -18,8 +18,8 @@ func server() {
 	_, err = os.Stat(keyLoc)
 	handle(err, "Failed to load openssl keys")
 
-	fmt.Println("Attempting to reconnect to previous containers.")
-	reconnect()
+	//fmt.Println("Attempting to reconnect to previous containers.")
+	//reconnect()
 
 	// Handler Functions
 	mux := http.NewServeMux()
@@ -51,20 +51,20 @@ func server() {
 }
 
 // Try and reconnect to previous containers
-func reconnect() {
-
-	items, _ := ioutil.ReadDir(folder.Docker)
-	for _, item := range items {
-		if item.IsDir() {
-			newJob := taskJob{
-				Name:      "Restarted Task",
-				Type:      "docker",
-				Reconnect: true}
-
-			newJob.ID = item.Name()
-			allJobs.List = append(allJobs.List, &newJob)
-			comm := &newJob
-			go comm.Run()
-		}
-	}
-}
+//func reconnect() {
+//
+//	items, _ := ioutil.ReadDir(folder.Docker)
+//	for _, item := range items {
+//		if item.IsDir() {
+//			newJob := taskJob{
+//				Name:      "Restarted Task",
+//				Type:      "docker",
+//				Reconnect: true}
+//
+//			newJob.ID = item.Name()
+//			allJobs.List = append(allJobs.List, &newJob)
+//			comm := &newJob
+//			go comm.Run()
+//		}
+//	}
+//}
