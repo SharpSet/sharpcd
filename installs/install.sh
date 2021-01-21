@@ -32,7 +32,8 @@ sudo systemctl daemon-reload
 
 # Download and unpack
 wget https://github.com/Sharpz7/sharpcd/releases/download/XXXXX/linux.tar.gz
-sudo tar -C --skip-old-files /usr/local/bin/ -zxvf linux.tar.gz
+sudo tar -C /tmp/sharpcd -zxvf linux.tar.gz
+sudo cp -n -R /tmp/sharpcd/* /usr/local/bin/
 rm -r linux.tar.gz
 
 # Create SharpCD User
