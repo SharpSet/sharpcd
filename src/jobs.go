@@ -37,7 +37,8 @@ func createJob(payload postData) {
 		Type:       payload.Type,
 		URL:        payload.GitURL + payload.Compose,
 		Enviroment: payload.Enviroment,
-		Registry:   payload.Registry}
+		Registry:   payload.Registry,
+		Reconnect:  false}
 
 	// If a job with that ID already exists
 	if job := getJob(payload.ID); job != nil {
@@ -129,47 +130,55 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	logsLoc := folder.Logs + id
 	composeLoc := folder.Docker + id + "/docker-compose.yml"
 
-	// Get github token
-	f, err := readFilter()
-	if err != nil {
-		handleAPI(err, job, "Failed to get Token")
+	if job.Reconnect != true {
+		// Get github token
+		f, err := readFilter()
+		if err != nil {
+			handleAPI(err, job, "Failed to get Token")
+		}
+
+		// Make url, read the compose file
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			handleAPI(err, job, "Failed to build request")
+		}
+		req.Header.Set("Authorization", "token "+f.Token)
+		req.Header.Set("Accept", "application/vnd.github.v3.raw")
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			handleAPI(err, job, "Failed to get compose URL")
+		}
+		defer resp.Body.Close()
+		file, err := ioutil.ReadAll(resp.Body)
+		handleAPI(err, job, "Failed to read compose file")
+
+		// Make directory for docker and logs and save file
+		os.Mkdir(folder.Docker+id, 0777)
+		os.Mkdir(logsLoc, 0777)
+		err = ioutil.WriteFile(composeLoc, file, 0777)
+		handleAPI(err, job, "Failed to write to file")
+
+		if job.Registry != "" {
+			job.dockerLogin()
+		}
+
+		// Make sure config is valid
+		err = job.buildCommand("-f", composeLoc, "up", "--no-start")
+		if err != nil {
+			return nil
+		}
+
+		// Remove any previous containers
+		job.buildCommand("-f", composeLoc, "down")
+		// Pull new images
+		job.buildCommand("-f", composeLoc, "pull")
+		// Run Code
+		job.buildCommand("-f", composeLoc, "up", "-d")
 	}
-
-	// Make url, read the compose file
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		handleAPI(err, job, "Failed to build request")
-	}
-	req.Header.Set("Authorization", "token "+f.Token)
-	req.Header.Set("Accept", "application/vnd.github.v3.raw")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		handleAPI(err, job, "Failed to get compose URL")
-	}
-	defer resp.Body.Close()
-	file, err := ioutil.ReadAll(resp.Body)
-	handleAPI(err, job, "Failed to read compose file")
-
-	// Make directory for docker and logs and save file
-	os.Mkdir(folder.Docker+id, 0777)
-	os.Mkdir(logsLoc, 0777)
-	err = ioutil.WriteFile(composeLoc, file, 0777)
-	handleAPI(err, job, "Failed to write to file")
-
-	if job.Registry != "" {
-		job.dockerLogin()
-	}
-
-	// Make sure config is valid
-	job.buildCommand("-f", composeLoc, "up", "-d")
-	// Remove any previous containers
-	job.buildCommand("-f", composeLoc, "down")
-	// Pull new images
-	job.buildCommand("-f", composeLoc, "pull")
 
 	// Get logging Running
-	cmd := exec.Command("docker-compose", "-f", composeLoc, "up", "--no-color")
+	cmd := exec.Command("docker-compose", "-f", composeLoc, "logs", "-f", "--no-color")
 	outfile, err := os.Create(logsLoc + "/info.log")
 	handleAPI(err, job, "Failed to create log file")
 	cmd.Env = job.insertEnviroment()
@@ -196,7 +205,7 @@ func (job *taskJob) dockerLogin() {
 	handleAPI(err, job, errMsg)
 }
 
-func (job *taskJob) buildCommand(args ...string) {
+func (job *taskJob) buildCommand(args ...string) error {
 	var errMsg string
 	cmd := exec.Command("docker-compose", args...)
 	cmd.Env = job.insertEnviroment()
@@ -232,6 +241,9 @@ func (job *taskJob) buildCommand(args ...string) {
 	} else {
 		errMsg = string(out)
 		handleAPI(err, job, errMsg)
+		return err
 	}
+
+	return nil
 
 }
