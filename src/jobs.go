@@ -142,7 +142,11 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 		if err != nil {
 			handleAPI(err, job, "Failed to build request")
 		}
-		req.Header.Set("Authorization", "token "+f.Token)
+
+		if f.Token != "" {
+			req.Header.Set("Authorization", "token "+f.Token)
+		}
+
 		req.Header.Set("Accept", "application/vnd.github.v3.raw")
 
 		resp, err := http.DefaultClient.Do(req)
