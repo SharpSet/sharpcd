@@ -7,7 +7,7 @@ Installation
 ===========
 On linux, just run:
 ```console
-adam@console~$ sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/0.1.4/install.sh | sudo bash
+adam@console~$ sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/0.1.5/install.sh | sudo bash
 ```
 
 Maintainers and Developers

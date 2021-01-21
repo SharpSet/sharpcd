@@ -25,6 +25,7 @@ Args of SharpCD:
 	- addfilter: Add a url for a compose file
 	- changetoken: Add a token for private github repos
 	- removefilter: Remove a url for a compose file
+	- version: Returns the Current Version
 
 This will read the sharpdev.yml file
 		`)
@@ -54,6 +55,8 @@ func main() {
 			removeFilter()
 		case "changetoken":
 			changeToken()
+		case "version":
+			fmt.Println("Version: 0.1.5")
 		default:
 			log.Fatal("This subcommand does not exist!")
 		}
