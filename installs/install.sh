@@ -6,13 +6,32 @@ sudo apt-get install -y lsof
 # Uninstall any previous versions.
 echo "Checking for any previous version..."
 sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
-sudo rm -r /usr/local/bin/sharpcd /usr/local/bin/sharpcd-data
+
+ver=$(echo $(sharpdev version) | sed "s/^.*Version: \([0-9.]*\).*/\1/")
+vernum=$(echo "$ver" | sed -r 's/[.0]+//g')
+
+if [[ $vernum =~ ^[0-9]+$ ]];
+then
+  if [[ $vernum < 0 ]];
+  then
+    echo "Breaking changes: Removing old sharpcd-data"
+    read -r -p "Are you sure? [y/N] " response
+    if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]
+    then
+        echo "Deleting old Data..."
+        sudo rm -r /usr/local/bin/sharpcd /usr/local/bin/sharpcd-data
+    else
+        exit
+    fi
+  fi
+fi
+
 sudo rm /etc/systemd/system/sharpcd.service
 sudo systemctl daemon-reload
 
 # Download and unpack
 wget https://github.com/Sharpz7/sharpcd/releases/download/XXXXX/linux.tar.gz
-sudo tar -C /usr/local/bin/ -zxvf linux.tar.gz
+sudo tar -C --skip-old-files /usr/local/bin/ -zxvf linux.tar.gz
 rm -r linux.tar.gz
 
 # Create SharpCD User
