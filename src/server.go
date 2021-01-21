@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -50,20 +51,20 @@ func server() {
 }
 
 // Try and reconnect to previous containers
-//func reconnect() {
-//
-//	items, _ := ioutil.ReadDir(folder.Docker)
-//	for _, item := range items {
-//		if item.IsDir() {
-//			newJob := taskJob{
-//				Name:      "Restarted Task",
-//				Type:      "docker",
-//				Reconnect: true}
-//
-//			newJob.ID = item.Name()
-//			allJobs.List = append(allJobs.List, &newJob)
-//			comm := &newJob
-//			go comm.Run()
-//		}
-//	}
-//}
+func reconnect() {
+
+	items, _ := ioutil.ReadDir(folder.Docker)
+	for _, item := range items {
+		if item.IsDir() {
+			newJob := taskJob{
+				Name:      "Restarted Task",
+				Type:      "docker",
+				Reconnect: true}
+
+			newJob.ID = item.Name()
+			allJobs.List = append(allJobs.List, &newJob)
+			comm := &newJob
+			go comm.Run()
+		}
+	}
+}
