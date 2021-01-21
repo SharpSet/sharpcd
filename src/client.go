@@ -182,7 +182,7 @@ func postCommChecks(t task, id string) error {
 			return errors.New("Bad Task")
 		}
 
-		if counter > 5 {
+		if counter > 7 {
 			fmt.Println("Task has started Properly!")
 			return nil
 		}

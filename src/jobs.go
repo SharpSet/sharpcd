@@ -38,7 +38,7 @@ func createJob(payload postData) {
 		URL:        payload.GitURL + payload.Compose,
 		Enviroment: payload.Enviroment,
 		Registry:   payload.Registry,
-		Reconnect:  true}
+		Reconnect:  false}
 
 	// If a job with that ID already exists
 	if job := getJob(payload.ID); job != nil {
@@ -178,7 +178,6 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	}
 
 	// Get logging Running
-	time.Sleep(3 * time.Second)
 	cmd := exec.Command("docker-compose", "-f", composeLoc, "logs", "-f", "--no-color")
 	outfile, err := os.Create(logsLoc + "/info.log")
 	handleAPI(err, job, "Failed to create log file")
