@@ -45,6 +45,7 @@ type taskJob struct {
 	URL        string            `json:"url"`
 	Enviroment map[string]string `json:"-"`
 	Registry   string            `json:"registry"`
+	Reconnect  bool
 }
 
 type allTaskJobs struct {

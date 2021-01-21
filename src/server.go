@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -17,6 +18,8 @@ func server() {
 	_, err = os.Stat(keyLoc)
 	handle(err, "Failed to load openssl keys")
 
+	fmt.Println("Attempting to reconnect to previous containers.")
+	reconnect()
 
 	// Handler Functions
 	mux := http.NewServeMux()
@@ -45,4 +48,23 @@ func server() {
 	}
 	fmt.Println("Server Successfully Running!")
 	log.Fatal(srv.ListenAndServeTLS(certLoc, keyLoc))
+}
+
+// Try and reconnect to previous containers
+func reconnect() {
+
+	items, _ := ioutil.ReadDir(folder.Docker)
+	for _, item := range items {
+		if item.IsDir() {
+			newJob := taskJob{
+				Name:      "Restarted Task",
+				Type:      "docker",
+				Reconnect: true}
+
+			newJob.ID = item.Name()
+			allJobs.List = append(allJobs.List, &newJob)
+			comm := &newJob
+			go comm.Run()
+		}
+	}
 }
