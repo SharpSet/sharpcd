@@ -6,8 +6,9 @@ sudo apt-get install -y lsof
 # Uninstall any previous versions.
 echo "Checking for any previous version..."
 sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
+sudo rm -r /usr/local/bin/sharpcd
 
-ver=$(echo $(sharpdev version) | sed "s/^.*Version: \([0-9.]*\).*/\1/")
+ver=$(echo $(sharpcd version) | sed "s/^.*Version: \([0-9.]*\).*/\1/")
 vernum=$(echo "$ver" | sed -r 's/[.0]+//g')
 
 if [[ $vernum =~ ^[0-9]+$ ]];
@@ -19,7 +20,7 @@ then
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]
     then
         echo "Deleting old Data..."
-        sudo rm -r /usr/local/bin/sharpcd /usr/local/bin/sharpcd-data
+        sudo rm -r /usr/local/bin/sharpcd-data
     else
         exit
     fi
