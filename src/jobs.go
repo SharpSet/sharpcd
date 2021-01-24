@@ -130,7 +130,7 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	logsLoc := folder.Logs + id
 	composeLoc := folder.Docker + id + "/docker-compose.yml"
 
-	if job.Reconnect == false {
+	if job.Reconnect != true {
 		// Get github token
 		f, err := readFilter()
 		if err != nil {
