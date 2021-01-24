@@ -18,8 +18,8 @@ func server() {
 	_, err = os.Stat(keyLoc)
 	handle(err, "Failed to load openssl keys")
 
-	//fmt.Println("Attempting to reconnect to previous containers.")
-	//reconnect()
+	fmt.Println("Attempting to reconnect to previous containers.")
+	reconnect()
 
 	// Handler Functions
 	mux := http.NewServeMux()
