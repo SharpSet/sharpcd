@@ -167,6 +167,9 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 			job.dockerLogin()
 		}
 
+		// Pull new images
+		job.buildCommand("-f", composeLoc, "pull")
+
 		// Make sure config is valid
 		err = job.buildCommand("-f", composeLoc, "up", "--no-start")
 		if err != nil {
@@ -175,8 +178,6 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 
 		// Remove any previous containers
 		job.buildCommand("-f", composeLoc, "down")
-		// Pull new images
-		job.buildCommand("-f", composeLoc, "pull")
 		// Run Code
 		job.buildCommand("-f", composeLoc, "up", "-d")
 	}
