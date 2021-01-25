@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -137,17 +136,18 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 
 		// Make sure config is valid
 		err = job.buildCommand("-f", composeLoc, "up", "--no-start")
-		if err != nil {
+		if err == nil {
+			// Remove any previous containers
+			job.buildCommand("-f", composeLoc, "down")
+
+			// Run Code
+			job.buildCommand("-f", composeLoc, "up", "-d")
+
+			if job.Registry != "" {
+				job.dockerLogout()
+			}
+		} else {
 			return nil
-		}
-		// Remove any previous containers
-		job.buildCommand("-f", composeLoc, "down")
-
-		// Run Code
-		job.buildCommand("-f", composeLoc, "up", "-d")
-
-		if job.Registry != "" {
-			job.dockerLogout()
 		}
 	}
 
@@ -176,7 +176,6 @@ func (job *taskJob) dockerLogin() {
 	cmd := exec.Command("docker", "login", "-u", job.Enviroment["DOCKER_USER"], "-p", job.Enviroment["DOCKER_PASS"], job.Registry)
 	out, err := cmd.CombinedOutput()
 	errMsg := string(out)
-	fmt.Println(errMsg)
 	handleAPI(err, job, errMsg)
 }
 
@@ -192,12 +191,12 @@ func (job *taskJob) buildCommand(args ...string) error {
 	cmd := exec.Command("docker-compose", args...)
 	cmd.Env = job.insertEnviroment()
 	out, err := cmd.CombinedOutput()
-	fmt.Println(string(out))
 
 	// Add conditions for volumes and networks
 	if strings.Contains(string(out), "404") {
 		errMsg = "No Compose File Found!"
 		handleAPI(err, job, errMsg)
+		return err
 	} else if strings.Contains(string(out), "manually using `") {
 
 		for {
