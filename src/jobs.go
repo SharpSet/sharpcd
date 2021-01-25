@@ -1,13 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
-	"time"
 )
 
 // Pointer to variable storing all jobs
@@ -45,9 +45,6 @@ func createJob(payload postData) {
 
 		// Assign its ID to the old job ID
 		newJob.ID = job.ID
-
-		// Stop the old job
-		job.Stop()
 
 		// Replace and run the new job
 		*job = newJob
@@ -87,38 +84,6 @@ func (job *taskJob) Run() {
 		// When finished, mark as stopped
 		job.Status = jobStatus.Stopped
 	}
-}
-
-// Stop a job Task
-func (job *taskJob) Stop() {
-
-	var cmd *exec.Cmd
-
-	// Mark Job as stopping, Clear error Message
-	job.Status = jobStatus.Stopping
-
-	// Makes sure to run the correct stop sequence
-	switch job.Type {
-	case "docker":
-		cmd = job.DockerStop()
-	}
-
-	err := cmd.Run()
-	handleAPI(err, job, "Failed to Stop Job")
-
-	// Sleeps to API can pick it up
-	time.Sleep(2 * time.Second)
-}
-
-// Stop sequence for a docker job
-func (job *taskJob) DockerStop() *exec.Cmd {
-	composeLoc := folder.Docker + job.ID + "/docker-compose.yml"
-
-	// Stopping the container
-	cmd := exec.Command("docker-compose", "-f", composeLoc, "down")
-	cmd.Env = job.insertEnviroment()
-
-	return cmd
 }
 
 // Get cmd for a Docker Job
@@ -175,11 +140,15 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 		if err != nil {
 			return nil
 		}
-
 		// Remove any previous containers
 		job.buildCommand("-f", composeLoc, "down")
+
 		// Run Code
 		job.buildCommand("-f", composeLoc, "up", "-d")
+
+		if job.Registry != "" {
+			job.dockerLogout()
+		}
 	}
 
 	// Get logging Running
@@ -204,7 +173,15 @@ func (job *taskJob) insertEnviroment() []string {
 }
 
 func (job *taskJob) dockerLogin() {
-	cmd := exec.Command("docker", "login", job.Registry, "-u", job.Enviroment["DOCKER_USER"], "-p", job.Enviroment["DOCKER_PASS"])
+	cmd := exec.Command("docker", "login", "-u", job.Enviroment["DOCKER_USER"], "-p", job.Enviroment["DOCKER_PASS"], job.Registry)
+	out, err := cmd.CombinedOutput()
+	errMsg := string(out)
+	fmt.Println(errMsg)
+	handleAPI(err, job, errMsg)
+}
+
+func (job *taskJob) dockerLogout() {
+	cmd := exec.Command("docker", "logout", job.Registry)
 	out, err := cmd.CombinedOutput()
 	errMsg := string(out)
 	handleAPI(err, job, errMsg)
@@ -215,6 +192,7 @@ func (job *taskJob) buildCommand(args ...string) error {
 	cmd := exec.Command("docker-compose", args...)
 	cmd.Env = job.insertEnviroment()
 	out, err := cmd.CombinedOutput()
+	fmt.Println(string(out))
 
 	// Add conditions for volumes and networks
 	if strings.Contains(string(out), "404") {
