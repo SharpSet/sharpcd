@@ -56,7 +56,7 @@ func main() {
 		case "changetoken":
 			changeToken()
 		case "version":
-			fmt.Println("Version: 0.1.6")
+			fmt.Println("Version: 0.1.7")
 		default:
 			log.Fatal("This subcommand does not exist!")
 		}

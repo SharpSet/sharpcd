@@ -2,7 +2,7 @@ version: 0.1
 envfile: .env
 
 values:
-  SECRET: '{\"secret\":\"Secret123\"}'
+  SECRET: '{\"secret\":\"2sXWC45S45vf7B6G6gh8G876m0FYJ\"}'
 
 scripts:
   build: go build -o ./internal/sharpcd ./src
@@ -30,7 +30,7 @@ scripts:
   filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
   remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/
   token: ./internal/sharpcd changetoken ${SHARP_ARG_1}
-  alljobs: curl -k -X POST -d SECRET https://localhost:5666/api/jobs
+  alljobs: curl -k -X POST -d SECRET https://173.212.252.82:5666/api/jobs
 
   file: |
     curl -H 'Authorization: token ${SHARP_ARG_1}' \
