@@ -2,7 +2,7 @@ version: 0.1
 envfile: .env
 
 values:
-  SECRET: '{\"secret\":\"2sXWC45S45vf7B6G6gh8G876m0FYJ\"}'
+  SECRET: '{\"secret\":\"$PASS\"}'
 
 scripts:
   build: go build -o ./internal/sharpcd ./src
