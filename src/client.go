@@ -124,7 +124,6 @@ func postCommChecks(t task, id string) error {
 	payload := postData{
 		Secret: getSec()}
 	buildingTriggered := false
-	stoppingTriggered := false
 	runningTriggered := false
 	counter := 0
 
@@ -145,12 +144,6 @@ func postCommChecks(t task, id string) error {
 		errored := job.Status == jobStatus.Errored
 		building := job.Status == jobStatus.Building && !buildingTriggered
 		running := job.Status == jobStatus.Running && !runningTriggered
-		stopping := job.Status == jobStatus.Stopping && !stoppingTriggered
-
-		if stopping {
-			stoppingTriggered = true
-			fmt.Println("The Task already exists on server. Stopping old job...")
-		}
 
 		if building {
 			buildingTriggered = true

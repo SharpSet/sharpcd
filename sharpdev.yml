@@ -2,6 +2,7 @@ version: 0.1
 envfile: .env
 
 values:
+  SECRETD: '{\"secret\":\"$PASSD\"}'
   SECRET: '{\"secret\":\"$PASS\"}'
 
 scripts:
@@ -23,13 +24,14 @@ scripts:
     $(sudo docker volume rm memes) > /dev/null 2>&1 || true &&
     $(sudo docker network rm memes) > /dev/null 2>&1 || true &&
     sharpdev build &&
-    ./internal/sharpcd --secret Secret123
+    ./internal/sharpcd --secret $PASSD
 
-  job: curl -k -X POST -d SECRET https://localhost:5666/api/job/${SHARP_ARG_1}
-  logs: curl -k -X POST -d SECRET https://localhost:5666/api/logs/${SHARP_ARG_1}
+  job: curl -k -X POST -d SECRETD https://localhost:5666/api/job/${SHARP_ARG_1}
+  logs: curl -k -X POST -d SECRETD https://localhost:5666/api/logs/${SHARP_ARG_1}
   filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
   remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/
   token: ./internal/sharpcd changetoken ${SHARP_ARG_1}
+  alljobsd: curl -k -X POST -d SECRETD https://localhost:5666/api/jobs
   alljobs: curl -k -X POST -d SECRET https://173.212.252.82:5666/api/jobs
 
   file: |
