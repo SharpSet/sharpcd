@@ -8,55 +8,55 @@ tasks:
     giturl: https://raw.githubusercontent.com/Sharpz7/
     compose: /sharpcd/dev/testing/basic.yml
 
-  registry_task:
-    name: Registry
-    type: docker
-    registry: docker.mcaq.me
-    envfile: .env
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/registry.yml
+  # registry_task:
+  #   name: Registry
+  #   type: docker
+  #   registry: docker.mcaq.me
+  #   envfile: .env
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/registry.yml
 
-  env_task:
-    name: Enviroment Test Fail
-    type: docker
-    envfile: .env
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/env.yml
+  # env_task:
+  #   name: Enviroment Test Fail
+  #   type: docker
+  #   envfile: .env
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/env.yml
 
-  external_task:
-    name: External Docker Parts
-    type: docker
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/external.yml
+  # external_task:
+  #   name: External Docker Parts
+  #   type: docker
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/external.yml
 
-  env_task2:
-    name: Enviroment Test Pass
-    type: docker
-    envfile: ./testing/.env
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/env.yml
+  # env_task2:
+  #   name: Enviroment Test Pass
+  #   type: docker
+  #   envfile: ./testing/.env
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/env.yml
 
-  file_task:
-    name: No Compose File
-    type: docker
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/basic
+  # file_task:
+  #   name: No Compose File
+  #   type: docker
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/basic
 
-  Delayed_task:
-    name: Delayed stop
-    type: docker
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/delayed.yml
+  # Delayed_task:
+  #   name: Delayed stop
+  #   type: docker
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/delayed.yml
 
-  Restart_task:
-    name: Test Log exit
-    type: docker
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/restart.yml
+  # Restart_task:
+  #   name: Test Log exit
+  #   type: docker
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/restart.yml

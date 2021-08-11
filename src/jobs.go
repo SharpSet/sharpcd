@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -80,8 +81,8 @@ func (job *taskJob) Run() {
 		err := cmd.Run()
 		handleAPI(err, job, "Job Exited With Error")
 
-		// When finished, mark as stopped
 		job.Status = jobStatus.Stopped
+
 	}
 }
 
@@ -93,6 +94,9 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	url := job.URL
 	logsLoc := folder.Logs + id
 	composeLoc := folder.Docker + id + "/docker-compose.yml"
+
+	// Remove any previous containers
+	job.buildCommand("-f", composeLoc, "down")
 
 	if job.Reconnect != true {
 		// Get github token
@@ -109,9 +113,8 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 
 		if f.Token != "" {
 			req.Header.Set("Authorization", "token "+f.Token)
+			req.Header.Set("Accept", "application/vnd.github.v3.raw")
 		}
-
-		req.Header.Set("Accept", "application/vnd.github.v3.raw")
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
@@ -126,8 +129,18 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 		os.Mkdir(logsLoc, 0777)
 
 		// Ensure ComposeLoc is Empty
-		if err := os.Truncate(composeLoc, 0); err != nil {
-			handleAPI(err, job, "Failed to Truncate")
+
+		_, err = os.Stat(composeLoc)
+		if err == nil {
+			err = os.Remove(composeLoc)
+			if err != nil {
+				handleAPI(err, job, "Failed to Remove")
+			}
+		}
+
+		if strings.Contains(string(file), "404") {
+			err = errors.New("404 in Compose File")
+			handleAPI(err, job, "Github Token invalid or wrong compose URL")
 		}
 
 		// Write to file
@@ -160,6 +173,7 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 
 	// Get logging Running
 	cmd := exec.Command("docker-compose", "-f", composeLoc, "logs", "-f", "--no-color")
+
 	outfile, err := os.Create(logsLoc + "/info.log")
 	handleAPI(err, job, "Failed to create log file")
 	cmd.Env = job.insertEnviroment()

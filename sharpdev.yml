@@ -8,8 +8,6 @@ values:
 scripts:
   build: |
     go build -o ./internal/sharpcd ./src
-    git checkout dev
-    git push origin dev
 
   revert: git revert $_ARG1..HEAD
   list: git branch
@@ -21,7 +19,7 @@ scripts:
     sudo apt-get install -y lsof
     sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
     sharpdev build
-    sudo ./internal/sharpcd server > /dev/null 2>&1
+    sudo ./internal/sharpcd server
 
   client: |
     sudo docker-compose -f "./internal/sharpcd-data/docker/external_task/docker-compose.yml" down
@@ -43,5 +41,10 @@ scripts:
     -H 'Accept: application/vnd.github.v3.raw' \
     -O \
     -L https://raw.githubusercontent.com/Sharpz7/stuandbob/main/docker-compose.yml
+
+  test: |
+    git checkout dev
+    git push origin dev
+    sharpdev client
 
 
