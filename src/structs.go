@@ -21,6 +21,8 @@ var statCode = statusCodes{
 	BannedURL:        616,
 	CommDoesNotExist: 617}
 
+var sharpCDVersion = "0.1.10"
+
 type jobStats struct {
 	Running  string
 	Errored  string

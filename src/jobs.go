@@ -124,6 +124,13 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 		// Make directory for docker and logs and save file
 		os.Mkdir(folder.Docker+id, 0777)
 		os.Mkdir(logsLoc, 0777)
+
+		// Ensure ComposeLoc is Empty
+		if err := os.Truncate(composeLoc, 0); err != nil {
+			handleAPI(err, job, "Failed to Truncate")
+		}
+
+		// Write to file
 		err = ioutil.WriteFile(composeLoc, file, 0777)
 		handleAPI(err, job, "Failed to write to file")
 

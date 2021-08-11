@@ -56,7 +56,7 @@ func main() {
 		case "changetoken":
 			changeToken()
 		case "version":
-			fmt.Println("Version: 0.1.9")
+			fmt.Println("Version: " + sharpCDVersion)
 		default:
 			log.Fatal("This subcommand does not exist!")
 		}
