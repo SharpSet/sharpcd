@@ -43,7 +43,8 @@ func client() {
 			Compose:    task.Compose,
 			Enviroment: getEnviroment(task.Envfile),
 			Registry:   task.Registry,
-			Secret:     getSec()}
+			Secret:     getSec(),
+			Version:    sharpCDVersion}
 
 		// Make POST request and let user know if successful
 		body, code := post(payload, task.SharpURL)
@@ -59,6 +60,7 @@ func client() {
 		} else {
 			fmt.Println(body.Message)
 			fmt.Printf("Task %s Failed!\n\n", task.Name)
+			os.Exit(1)
 		}
 	}
 
@@ -125,6 +127,7 @@ func postCommChecks(t task, id string) error {
 		Secret: getSec()}
 	buildingTriggered := false
 	runningTriggered := false
+	lastIssue := ""
 	counter := 0
 
 	fmt.Println("Waiting on server response...")
@@ -173,6 +176,11 @@ func postCommChecks(t task, id string) error {
 			}
 
 			return errors.New("Bad Task")
+		}
+
+		if lastIssue != job.Issue {
+			fmt.Println("No fatal Issue found: " + job.Issue)
+			lastIssue = job.Issue
 		}
 
 		if counter > 7 {

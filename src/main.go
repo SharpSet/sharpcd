@@ -47,6 +47,8 @@ func main() {
 		switch arg1 {
 		case "server":
 			server()
+		case "help":
+			flag.Usage()
 		case "setsecret":
 			setSec()
 		case "addfilter":
@@ -56,17 +58,29 @@ func main() {
 		case "changetoken":
 			changeToken()
 		case "version":
-			fmt.Println("Version: 0.1.9")
+			fmt.Println("Version: " + sharpCDVersion)
 		default:
 			log.Fatal("This subcommand does not exist!")
+			flag.Usage()
 		}
 	}
 	return
 }
 
 func getDir() string {
-	ex, err := os.Executable()
-	handle(err, "Failed to get dir")
-	exPath := filepath.Dir(ex)
+	var exPath string
+	var err error
+
+	if os.Getenv("DEV") == "TRUE" {
+		exPath, err = os.Getwd()
+		handle(err, "Failed to get dir")
+
+	} else {
+		ex, err := os.Executable()
+		handle(err, "Failed to get dir")
+		exPath = filepath.Dir(ex)
+
+	}
+
 	return exPath
 }

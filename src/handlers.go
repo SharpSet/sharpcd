@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+
+	"github.com/hashicorp/go-version"
 )
 
 // Hander for requests made to /api/
@@ -48,6 +50,10 @@ func httpHandleTask(w http.ResponseWriter, r *http.Request) {
 	err := checkURL(payload.GitURL)
 	handleStatus(err, statCode.BannedURL, &status)
 
+	// Check Version
+	err = checkVersion(payload.Version)
+	handleStatus(err, statCode.WrongVersion, &status)
+
 	// Get task Type
 	err = checkTaskType(payload)
 	handleStatus(err, statCode.CommDoesNotExist, &status)
@@ -83,6 +89,9 @@ func getFailMessage(status int) string {
 
 	case statCode.IncorrectSecret:
 		return "SharpCD: Incorrect Secret"
+
+	case statCode.WrongVersion:
+		return "SharpCD: Wrong Client Version, expected " + sharpCDVersion + " or above."
 
 	case statCode.NotPostMethod:
 		return "SharpCD: Only accepting POST requests"
@@ -127,6 +136,17 @@ func checkMethod(method string) error {
 	}
 
 	return nil
+}
+
+func checkVersion(clientVersion string) error {
+	v1, err := version.NewVersion(clientVersion)
+	v2, err := version.NewVersion(sharpCDVersion)
+
+	if v1.LessThan(v2) {
+		err = errors.New("Wrong Client Version")
+	}
+
+	return err
 }
 
 // Checks if URLs are okay

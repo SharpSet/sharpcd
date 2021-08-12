@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -11,14 +12,15 @@ import (
 // Checks for client err
 // Records as Fatal
 func handle(e error, msg string) {
-	// Try and get SHARPDEV var
+	// Try and get DEV var
 	godotenv.Load()
 
 	if e != nil {
-		if os.Getenv("SHARPDEV") == "TRUE" {
+		if os.Getenv("DEV") == "TRUE" {
 			fmt.Println(e)
 		}
 		log.Fatal(msg)
+		flag.Usage()
 	}
 }
 
