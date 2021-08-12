@@ -95,9 +95,6 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	logsLoc := folder.Logs + id
 	composeLoc := folder.Docker + id + "/docker-compose.yml"
 
-	// Remove any previous containers
-	job.buildCommand("-f", composeLoc, "down")
-
 	if job.Reconnect != true {
 		// Get github token
 		f, err := readFilter()
@@ -128,24 +125,29 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 		os.Mkdir(folder.Docker+id, 0777)
 		os.Mkdir(logsLoc, 0777)
 
-		// Ensure ComposeLoc is Empty
-
-		_, err = os.Stat(composeLoc)
-		if err == nil {
-			err = os.Remove(composeLoc)
-			if err != nil {
-				handleAPI(err, job, "Failed to Remove")
-			}
-		}
-
 		if strings.Contains(string(file), "404") {
 			err = errors.New("404 in Compose File")
-			handleAPI(err, job, "Github Token invalid or wrong compose URL")
+			text := "Github Token invalid or wrong compose URL"
+			handleAPI(err, job, text)
+			job.Issue = text
 		}
 
-		// Write to file
-		err = ioutil.WriteFile(composeLoc, file, 0777)
-		handleAPI(err, job, "Failed to write to file")
+		// If Token was valid and compose file not empty
+		if err == nil {
+
+			// Ensure ComposeLoc is Empty
+			_, err = os.Stat(composeLoc)
+			if err == nil {
+				err = os.Remove(composeLoc)
+				if err != nil {
+					handleAPI(err, job, "Failed to Remove")
+				}
+			}
+
+			// Write to file
+			err = ioutil.WriteFile(composeLoc, file, 0777)
+			handleAPI(err, job, "Failed to write to file")
+		}
 
 		if job.Registry != "" {
 			job.dockerLogin()

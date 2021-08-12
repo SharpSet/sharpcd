@@ -47,6 +47,8 @@ func main() {
 		switch arg1 {
 		case "server":
 			server()
+		case "help":
+			flag.Usage()
 		case "setsecret":
 			setSec()
 		case "addfilter":
@@ -59,6 +61,7 @@ func main() {
 			fmt.Println("Version: " + sharpCDVersion)
 		default:
 			log.Fatal("This subcommand does not exist!")
+			flag.Usage()
 		}
 	}
 	return

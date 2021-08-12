@@ -4,5 +4,6 @@ packages:
 - golang.org/x/crypto/bcrypt
 - github.com/joho/godotenv
 - golang.org/x/term
+- github.com/hashicorp/go-version
 devpackages:
 - golang.org/x/sys/unix

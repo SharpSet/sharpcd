@@ -9,6 +9,7 @@ type statusCodes struct {
 	IncorrectSecret  int
 	CommDoesNotExist int
 	FailedLogRead    int
+	WrongVersion     int
 }
 
 var statCode = statusCodes{
@@ -19,7 +20,8 @@ var statCode = statusCodes{
 	IncorrectSecret:  613,
 	FailedLogRead:    614,
 	BannedURL:        616,
-	CommDoesNotExist: 617}
+	CommDoesNotExist: 617,
+	WrongVersion:     618}
 
 var sharpCDVersion = "0.1.10"
 
@@ -47,6 +49,7 @@ type taskJob struct {
 	URL        string            `json:"url"`
 	Enviroment map[string]string `json:"-"`
 	Registry   string            `json:"registry"`
+	Issue      string            `json:"issue"`
 	Reconnect  bool
 }
 
@@ -64,6 +67,7 @@ type postData struct {
 	Secret     string            `json:"secret"`
 	Compose    string            `json:"compose"`
 	Registry   string            `json:"registry"`
+	Version    string            `json:"version"`
 }
 
 type task struct {

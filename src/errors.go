@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -19,6 +20,7 @@ func handle(e error, msg string) {
 			fmt.Println(e)
 		}
 		log.Fatal(msg)
+		flag.Usage()
 	}
 }
 
