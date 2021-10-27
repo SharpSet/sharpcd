@@ -5,5 +5,10 @@ packages:
 - github.com/joho/godotenv
 - golang.org/x/term
 - github.com/hashicorp/go-version
+- github.com/olekukonko/tablewriter
+- github.com/gosuri/uilive
+- github.com/gizak/termui
+- github.com/common-nighthawk/go-figure
+- github.com/common-nighthawk/go-figure
 devpackages:
 - golang.org/x/sys/unix

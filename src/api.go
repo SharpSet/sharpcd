@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -24,6 +25,9 @@ func getAPIData(r *http.Request, resp *response) error {
 	case "logs":
 		resp.Message, err = getLogs(path[1])
 		return err
+	case "logsfeed":
+		resp.Message, err = getLogsFeed(path[1])
+		return err
 	}
 
 	return nil
@@ -31,7 +35,7 @@ func getAPIData(r *http.Request, resp *response) error {
 
 // Gets the logs from the task ID's file
 func getLogs(path string) (string, error) {
-	logs := folder.Logs + path + "/info.log"
+	logs := folder.Docker + path + "/info.log"
 	file, err := os.Open(logs)
 	if err != nil {
 		return "", err
@@ -43,6 +47,19 @@ func getLogs(path string) (string, error) {
 		return "", err
 	}
 	return string(bytes), nil
+}
+
+func getLogsFeed(path string) (string, error) {
+	logs := folder.Docker + path + "/info.log"
+
+	cmd := exec.Command("tail", "-20", logs)
+	out, err := cmd.CombinedOutput()
+	msg := string(out)
+	if err != nil {
+		return msg, errors.New("Failed to run Docker Compose")
+	}
+
+	return msg, nil
 }
 
 func getJobs(path string) (*taskJob, error) {
@@ -62,7 +79,7 @@ func checkJobStatus(job *taskJob) error {
 	logs, err := getLogs(job.ID)
 	if strings.Contains(logs, "exited with code") {
 		job.Status = jobStatus.Stopped
-		job.ErrMsg = "A Container exited unexpectedly"
+		job.ErrMsg = "A Container has maybe exited unexpectedly"
 	}
 
 	return err

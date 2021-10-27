@@ -47,6 +47,8 @@ func main() {
 		switch arg1 {
 		case "server":
 			server()
+		case "trak":
+			trak()
 		case "help":
 			flag.Usage()
 		case "setsecret":
@@ -67,6 +69,8 @@ func main() {
 	return
 }
 
+// Get the local directory
+// Method changes depending on enviroment
 func getDir() string {
 	var exPath string
 	var err error

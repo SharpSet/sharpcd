@@ -1,16 +1,69 @@
 [![CircleCI](https://circleci.com/gh/Sharpz7/sharpcd.svg?style=svg)](https://circleci.com/gh/Sharpz7/sharpcd)
 
-SharpCD || Continuous Development for your server
-===========
+# SharpCD || Continuous Development for your server
 
-Installation
-===========
-On linux, just run:
-```console
-adam@console~$ sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/0.1.10/install.sh | sudo bash
+![](https://files.mcaq.me/mmtz.png)
+
+# Example Config
+```yml
+version: 1
+
+tasks:
+  basic_task:
+    name: Basic
+    type: docker
+    sharpurl: https://localhost:5666
+    giturl: https://raw.githubusercontent.com/Sharpz7/
+    compose: /sharpcd/dev/testing/basic.yml
+
+  registry_task:
+    name: Registry
+    type: docker
+    registry: docker.mcaq.me
+    envfile: .env
+    sharpurl: https://localhost:5666
+    giturl: https://raw.githubusercontent.com/Sharpz7/
+    compose: /sharpcd/dev/testing/registry.yml
+
+  env_task:
+    name: Enviroment Test Fail
+    type: docker
+    envfile: .env
+    sharpurl: https://localhost:5666
+    giturl: https://raw.githubusercontent.com/Sharpz7/
+    compose: /sharpcd/dev/testing/env.yml
 ```
 
-Maintainers and Developers
-==========
+# Installation
+On linux, just run:
+```console
+╭─adam@box ~/
+╰─➤  sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/0.2.0/install.sh | sudo bash
+adam@console~$
+```
 
--   Sharp / [@Sharpz7](https://github.com/Sharpz7)
+## Command Options
+
+On linux, just run:
+```console
+╭-adam@box ~/
+╰─➤  sharpcd --help
+
+Args of SharpCD:
+
+        - server: Run the sharpcd server
+        - setsecret: Set the secret for API and Task Calls
+        - addfilter: Add a url for a compose file
+        - changetoken: Add a token for private github repos
+        - removefilter: Remove a url for a compose file
+        - version: Returns the Current Version
+
+This will read the sharpdev.yml file
+
+  -secret string
+        Put secret as a arg for automation tasks
+```
+
+## Maintainers
+
+- [Adam McArthur](https://adam.mcaq.me)

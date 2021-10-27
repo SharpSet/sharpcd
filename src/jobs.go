@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 // Pointer to variable storing all jobs
@@ -92,7 +94,7 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	// All Location Data
 	id := job.ID
 	url := job.URL
-	logsLoc := folder.Logs + id
+	logsLoc := folder.Docker + id
 	composeLoc := folder.Docker + id + "/docker-compose.yml"
 
 	if job.Reconnect != true {
@@ -185,14 +187,39 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 }
 
 func (job *taskJob) insertEnviroment() []string {
+
+	var err error
+	envfile := folder.Docker + job.ID + "/.env"
 	var environ []string
 
-	for key, val := range job.Enviroment {
-		str := key + "=" + val
-		environ = append(environ, str)
+	// If there is enviroment vars to use
+	if len(job.Enviroment) != 0 {
+
+		// Apply them
+		_, err = os.Create(envfile)
+		err = godotenv.Write(job.Enviroment, envfile)
+
+		handleAPI(err, job, "Failed to write to Envfile")
+	} else {
+		// Check if file exists for .env vars
+
+		_, err = os.Stat(envfile)
+		if err == nil {
+			job.Issue = "EnvFile exists but no Job Env Vars was given"
+		}
 	}
 
-	return append(os.Environ(), environ...)
+	fileEnviroment, err := godotenv.Read(envfile)
+	if err == nil {
+		for key, val := range fileEnviroment {
+			str := key + "=" + val
+			environ = append(environ, str)
+		}
+
+		return append(os.Environ(), environ...)
+	}
+
+	return nil
 }
 
 func (job *taskJob) dockerLogin() {

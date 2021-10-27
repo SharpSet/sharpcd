@@ -15,6 +15,10 @@ scripts:
    git tag archive/$_ARG1 $_ARG1
    git branch -d $_ARG1
 
+  helpsharpcd: |
+    sharpdev build
+    ./internal/sharpcd -help
+
   server: |
     sudo apt-get install -y lsof
     sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
@@ -28,6 +32,22 @@ scripts:
     sharpdev build
     ./internal/sharpcd --secret $PASSD
 
+  trak: |
+    sharpdev build
+    ./internal/sharpcd --secret $PASSD trak alljobs local
+
+  trakremote: |
+    sharpdev build
+    ./internal/sharpcd --secret $PASS trak alljobs remote
+
+  trakjob: |
+    sharpdev build
+    ./internal/sharpcd --secret $PASSD trak job local restart_task
+
+  trakjobremote: |
+    sharpdev build
+    ./internal/sharpcd --secret $PASS trak job remote adam_task
+
   job: curl -k -X POST -d SECRETD https://localhost:5666/api/job/$_ARG1
   logs: curl -k -X POST -d SECRETD https://localhost:5666/api/logs/$_ARG1
   filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
@@ -35,6 +55,7 @@ scripts:
   token: ./internal/sharpcd changetoken $_ARG1
   alljobsd: curl -k -X POST -d SECRETD https://localhost:5666/api/jobs
   alljobs: curl -k -X POST -d SECRET https://173.212.252.82:5666/api/jobs
+  logsfeed: curl -k -X POST -d SECRETD https://localhost:5666/api/logsfeed/$_ARG1
 
   file: |
     curl -H 'Authorization: token $_ARG1' \
@@ -46,5 +67,8 @@ scripts:
     git checkout dev
     git push origin dev
     sharpdev client
+
+  keygen: |
+    sudo openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout /home/coder/code-server/go/src/sharpCD/internal/sharpcd-data/private/server.key -out /home/coder/code-server/go/src/sharpCD/internal/sharpcd-data/private/server.crt -config /home/coder/code-server/go/src/sharpCD/testing/openssl.conf -extensions 'v3_req'
 
 

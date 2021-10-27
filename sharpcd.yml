@@ -1,5 +1,9 @@
 version: 1
 
+trak:
+  local: https://localhost:5666
+  remote: https://mcaq.me:5666
+
 tasks:
   basic_task:
     name: Basic

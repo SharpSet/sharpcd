@@ -1,5 +1,9 @@
 package main
 
+import (
+	"github.com/gorilla/websocket"
+)
+
 type statusCodes struct {
 	NotPostMethod    int
 	Accepted         int
@@ -23,7 +27,13 @@ var statCode = statusCodes{
 	CommDoesNotExist: 617,
 	WrongVersion:     618}
 
-var sharpCDVersion = "0.1.10"
+var (
+	upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
+	sharpCDVersion = "0.2.0"
+)
 
 type jobStats struct {
 	Running  string
@@ -70,6 +80,11 @@ type postData struct {
 	Version    string            `json:"version"`
 }
 
+type trakPostData struct {
+	Secret  string `json:"secret"`
+	Version string `json:"version"`
+}
+
 type task struct {
 	ID       string
 	Name     string
@@ -85,6 +100,7 @@ type task struct {
 type config struct {
 	Version float32
 	Tasks   map[string]task
+	Trak    map[string]string
 }
 
 type filter struct {
@@ -108,5 +124,4 @@ type allDirs struct {
 var folder = allDirs{
 	Root:    getDir() + "/sharpcd-data/",
 	Private: getDir() + "/sharpcd-data/private/",
-	Logs:    getDir() + "/sharpcd-data/logs/",
 	Docker:  getDir() + "/sharpcd-data/docker/"}
