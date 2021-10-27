@@ -51,14 +51,7 @@ tasks:
     giturl: https://raw.githubusercontent.com/Sharpz7/
     compose: /sharpcd/dev/testing/basic
 
-  Delayed_task:
-    name: Delayed stop
-    type: docker
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/delayed.yml
-
-  Restart_task:
+  restart_task:
     name: Test Log exit
     type: docker
     sharpurl: https://localhost:5666
