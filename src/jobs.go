@@ -162,7 +162,8 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 		err = job.buildCommand("-f", composeLoc, "up", "--no-start")
 		if err == nil {
 			// Remove any previous containers
-			job.buildCommand("-f", composeLoc, "down")
+			// Deals with any network active endpoints
+			job.buildCommand("-f", composeLoc, "down", "--remove-orphans")
 
 			// Run Code
 			job.buildCommand("-f", composeLoc, "up", "-d")

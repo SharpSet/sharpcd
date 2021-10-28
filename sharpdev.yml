@@ -46,10 +46,11 @@ scripts:
 
   trakjobremote: |
     sharpdev build
-    ./internal/sharpcd --secret $PASS trak job remote adam_task
+    ./internal/sharpcd --secret $PASS trak job remote codeserver_task
 
   job: curl -k -X POST -d SECRETD https://localhost:5666/api/job/$_ARG1
   logs: curl -k -X POST -d SECRETD https://localhost:5666/api/logs/$_ARG1
+  logsremote: curl -k -X POST -d SECRET https://mcaq.me:5666/api/logs/$_ARG1
   filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
   remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/
   token: ./internal/sharpcd changetoken $_ARG1

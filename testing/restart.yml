@@ -1,5 +1,9 @@
 version: '3'
 services:
+  hello_world:
+    image: ubuntu
+    command: tail -f /dev/null
+
   hello_world2:
     image: ubuntu
     command: ["/bin/sh", "-c", "echo Hello && sleep 2 && exit 2"]
