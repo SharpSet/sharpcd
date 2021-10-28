@@ -43,7 +43,6 @@ On linux, just run:
 ```console
 ╭─adam@box ~/
 ╰─➤  sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/0.2.0/install.sh | sudo bash
-adam@console~$
 ```
 
 ## Command Options
