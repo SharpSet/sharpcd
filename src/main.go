@@ -17,7 +17,6 @@ func init() {
 	// Creates Helper Function
 	flag.Usage = func() {
 		fmt.Println(`
-
 Args of SharpCD:
 
 	- server: Run the sharpcd server
@@ -38,6 +37,7 @@ Flags:
 		`)
 
 		flag.PrintDefaults()
+		fmt.Println()
 	}
 }
 
