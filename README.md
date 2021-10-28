@@ -49,8 +49,8 @@ On linux, just run:
 
 On linux, just run:
 ```console
-╭-adam@box ~/
-╰─➤  sharpcd --help
+╭─adam@box ~/
+╰─➤  sharpcd help
 
 Args of SharpCD:
 
@@ -60,8 +60,15 @@ Args of SharpCD:
         - changetoken: Add a token for private github repos
         - removefilter: Remove a url for a compose file
         - version: Returns the Current Version
+        - trak: Run the Trak program
 
-This will read the sharpdev.yml file
+Sub Command Trak:
+
+        - alljobs {type}: Get info on all jobs
+        - job {type} {id}: Get info on job with logging
+        - list {type}: Get all jobs running on sharpcd server
+
+Flags:
 
   -secret string
         Put secret as a arg for automation tasks
