@@ -52,7 +52,7 @@ func getLogs(path string) (string, error) {
 func getLogsFeed(path string) (string, error) {
 	logs := folder.Docker + path + "/info.log"
 
-	cmd := exec.Command("tail", "-20", logs)
+	cmd := exec.Command("tail", "-11", logs)
 	out, err := cmd.CombinedOutput()
 	msg := string(out)
 	if err != nil {

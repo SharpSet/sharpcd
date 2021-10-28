@@ -97,6 +97,8 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	logsLoc := folder.Docker + id
 	composeLoc := folder.Docker + id + "/docker-compose.yml"
 
+	var err error
+
 	if job.Reconnect != true {
 		// Get github token
 		f, err := readFilter()
@@ -141,6 +143,7 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 			_, err = os.Stat(composeLoc)
 			if err == nil {
 				err = os.Remove(composeLoc)
+
 				if err != nil {
 					handleAPI(err, job, "Failed to Remove")
 				}

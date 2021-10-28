@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -18,244 +20,156 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var tablePadding int = 2
+
 func trak() {
 
-	var arg2 = flag.Args()[1]
+	var trakArg = flag.Args()[1]
 
-	switch arg2 {
+	switch trakArg {
 	case "alljobs":
-		trakAllJobs()
+		liveFeed()
 	case "job":
-		trakJob()
+		liveFeed()
+	case "list":
+		listJobs()
 	default:
-		log.Fatal("This subcommand does not exist!")
+		handle(errors.New(""), "No valid trak arg was given")
+		flag.Usage()
 	}
 
 }
 
-// Makes POST Request and reads response
-func trakAllJobs() {
-
+// Lists all jobs running on server
+func listJobs() {
 	var location = flag.Args()[2]
 
+	var jobIDs []string
+
+	// Get sharpcd file
 	f, err := ioutil.ReadFile("./sharpcd.yml")
 	var con config
 	err = yaml.Unmarshal(f, &con)
 	handle(err, "Failed to read and extract sharpcd.yml")
 
-	url := con.Trak[location] + "/api/jobs/"
-	secret := getSec()
+	urlJobs := con.Trak[location] + "/api/jobs/"
 
-	trakPayload := trakPostData{
-		Secret:  secret,
-		Version: sharpCDVersion,
+	jobs := getAPIOutput(urlJobs).Jobs
+
+	for _, job := range jobs {
+		jobIDs = append(jobIDs, "  - "+job.ID)
 	}
 
-	jsonStr, err := json.Marshal(trakPayload)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-	handle(err, "Failed to create request for"+url)
+	fmt.Println("\nList of SharpCD Jobs running on " + con.Trak[location] + ":\n")
+	fmt.Println(strings.Join(jobIDs, "\n") + "\n")
+}
 
-	// Create client
-	// Allow self-signed certs
-	req.Header.Set("Content-Type", "application/json")
-	client := &http.Client{
-		Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
+// Creates Interface
+func liveFeed() {
+
+	var urlJob string
+	var urlJobs string
+	var urlLog string
+	var oldWidth = 0
+
+	var trakAll string = "alljobs"
+	var trakOne string = "job"
+
+	var trakArg = flag.Args()[1]
+	var location = flag.Args()[2]
+
+	// Get sharpcd file
+	f, err := ioutil.ReadFile("./sharpcd.yml")
+	var con config
+	err = yaml.Unmarshal(f, &con)
+	handle(err, "Failed to read and extract sharpcd.yml")
+
+	urlJobs = con.Trak[location] + "/api/jobs/"
+
+	// Only needed for single job requests
+	if trakArg == trakOne {
+		var jobID = flag.Args()[3]
+
+		urlJob = con.Trak[location] + "/api/job/" + jobID
+		urlLog = con.Trak[location] + "/api/logsfeed/" + jobID
 	}
 
+	// Tests to ensure you can actually reach the server
+	getAPIOutput(urlJobs)
+
+	// Load UI
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
 	}
 	defer ui.Close()
 
+	// Function for rendering UI
 	draw := func() {
-		// Do Request
-		resp, err := client.Do(req)
-		handle(err, "Failed to do POST request"+url)
-		defer resp.Body.Close()
+		table := tableMain()
 
-		// Read Body and Status
-		body, err := ioutil.ReadAll(resp.Body)
-		handle(err, "Failed to read body of response"+url)
+		var jobs []*taskJob
 
-		var apiOutput response
-		if err := json.Unmarshal(body, &apiOutput); err != nil {
-			panic(err)
+		// Gets all rows if there is one job
+		if trakArg == trakOne {
+			job := getAPIOutput(urlJob).Job
+
+			jobs = append(jobs, job)
 		}
 
-		jobs := apiOutput.Jobs
-
-		table1 := widgets.NewTable()
-		tablePadding := 2
-
-		table1.Rows = [][]string{
-			[]string{"ID", "Name", "Type", "Status", "Error Message", "Reconnected"},
+		// Gets all rows if there is there are multiple jobs
+		if trakArg == trakAll {
+			jobs = getAPIOutput(urlJobs).Jobs
 		}
+
+		// Adds in a row for each job
 		for _, job := range jobs {
 			jobStr := []string{
 				job.ID, job.Name, job.Type, job.Status, job.ErrMsg, strconv.FormatBool(job.Reconnect),
 			}
-			table1.Rows = append(table1.Rows, jobStr)
-		}
-		table1.ColumnWidths = generateColumns(table1.Rows, table1.Rows[0])
-		width := sum(table1.ColumnWidths) + len(table1.Rows[0]) + 1
-
-		p := widgets.NewParagraph()
-		myFigure := figure.NewFigure("SharpCD Trak", "", true)
-		figureRows := myFigure.Slicify()
-		p.Text = ""
-		figureSpace := 0
-
-		if width < len(figureRows[0]) {
-			width = len(figureRows[0]) + 4
-			figureSpace = 0
-		} else {
-			figureSpace = (width-len(figureRows[0]))/2 - 2*tablePadding - 1
+			table.Rows = append(table.Rows, jobStr)
 		}
 
-		for _, row := range figureRows {
-			p.Text += (strings.Repeat(" ", figureSpace) + row + "\n")
-		}
+		// Makes sure all widths are correct
+		table.ColumnWidths = generateColumnWidths(table.Rows, table.Rows[0])
+		width := sum(table.ColumnWidths) + len(table.Rows[0]) + 1
 
-		heightFigure := len(figureRows) + tablePadding
-		p.SetRect(0, 0, width, heightFigure)
-		ui.Render(p)
-
-		deltaYTable := heightFigure
-		heightTable := deltaYTable + len(table1.Rows)*2 + 1
-
-		table1.TextStyle = ui.NewStyle(ui.ColorWhite)
-		table1.SetRect(0, deltaYTable, width, heightTable)
-		table1.TextAlignment = ui.AlignCenter
-		table1.FillRow = true
-		ui.Render(table1)
-
-		deltaYClose := heightTable
-		heightClose := deltaYClose + 3
-
-		p = widgets.NewParagraph()
-		p.Text = "Press Ctrl+C to Exit"
-		p.SetRect(0, deltaYClose, width, heightClose)
-		ui.Render(p)
-
-	}
-
-	draw()
-
-	uiEvents := ui.PollEvents()
-	ticker := time.NewTicker(time.Second).C
-	for {
-		select {
-		case e := <-uiEvents:
-			switch e.ID {
-			case "q", "<C-c>":
-				return
-			}
-		case <-ticker:
-			draw()
-		}
-	}
-}
-
-// For Tracking just a job
-func trakJob() {
-
-	var location = flag.Args()[2]
-	var jobID = flag.Args()[3]
-
-	f, err := ioutil.ReadFile("./sharpcd.yml")
-	var con config
-	err = yaml.Unmarshal(f, &con)
-	handle(err, "Failed to read and extract sharpcd.yml")
-
-	urlJob := con.Trak[location] + "/api/job/" + jobID
-	urlLog := con.Trak[location] + "/api/logsfeed/" + jobID
-
-	if err := ui.Init(); err != nil {
-		log.Fatalf("failed to initialize termui: %v", err)
-	}
-	defer ui.Close()
-
-	var oldWidth = 0
-
-	draw := func() {
-		job := getAPIOutput(urlJob).Job
-
-		table1 := widgets.NewTable()
-		tablePadding := 2
-
-		table1.Rows = [][]string{
-			[]string{"ID", "Name", "Type", "Status", "Error Message", "Reconnected"},
-		}
-		jobStr := []string{
-			job.ID, job.Name, job.Type, job.Status, job.ErrMsg, strconv.FormatBool(job.Reconnect),
-		}
-		table1.Rows = append(table1.Rows, jobStr)
-
-		table1.ColumnWidths = generateColumns(table1.Rows, table1.Rows[0])
-		width := sum(table1.ColumnWidths) + len(table1.Rows[0]) + 1
-
+		// Deals with bug that if width space shrinks it doesn't render correctly
 		if oldWidth > width {
 			width = oldWidth
 		} else {
 			oldWidth = width
 		}
 
-		p := widgets.NewParagraph()
-		myFigure := figure.NewFigure("SharpCD Trak", "", true)
-		figureRows := myFigure.Slicify()
-		p.Text = ""
+		title, heightTitle := createTitle(width)
+		ui.Render(title)
 
-		figureSpace := (width-len(figureRows[0]))/2 - 2*tablePadding - 1
+		// Creates Table
+		deltaYTable := heightTitle
+		heightTable := deltaYTable + len(table.Rows)*2 + 1
+		table.SetRect(0, deltaYTable, width, heightTable)
+		ui.Render(table)
 
-		if figureSpace < 1 {
-			figureSpace = 1
+		// Creates Logs if needed
+		var heightLogs int
+		var trakLogs *widgets.Paragraph
+
+		if trakArg == trakOne {
+			trakLogs, heightLogs = logging(width, heightTable, urlLog)
+			ui.Render(trakLogs)
+		} else {
+			heightLogs = heightTable
 		}
 
-		for _, row := range figureRows {
-			p.Text += (strings.Repeat(" ", figureSpace) + row + "\n")
-		}
-
-		heightFigure := len(figureRows) + tablePadding
-		p.SetRect(0, 0, width, heightFigure)
-		ui.Render(p)
-
-		deltaYTable := heightFigure
-		heightTable := deltaYTable + len(table1.Rows)*2 + 1
-
-		table1.TextStyle = ui.NewStyle(ui.ColorWhite)
-		table1.SetRect(0, deltaYTable, width, heightTable)
-		table1.TextAlignment = ui.AlignCenter
-		table1.FillRow = true
-		ui.Render(table1)
-
-		logs := getAPIOutput(urlLog).Message
-
-		deltaYLogs := heightTable
-		heightLogs := deltaYLogs + 20
-
-		p = widgets.NewParagraph()
-		p.Text = logs
-		p.SetRect(0, deltaYLogs, width, heightLogs)
-		ui.Render(p)
-
-		deltaYClose := heightLogs
-		heightClose := deltaYClose + 3
-
-		p = widgets.NewParagraph()
-		p.Text = "Press Ctrl+C to Exit"
-		p.SetRect(0, deltaYClose, width, heightClose)
-		ui.Render(p)
+		close := closing(width, tablePadding, heightLogs)
+		ui.Render(close)
 
 	}
 
-	draw()
-
+	// Runs Interface
 	uiEvents := ui.PollEvents()
 	ticker := time.NewTicker(time.Second).C
+	draw()
+
 	for {
 		select {
 		case e := <-uiEvents:
@@ -267,8 +181,105 @@ func trakJob() {
 			draw()
 		}
 	}
+
 }
 
+// Creates Table with styling
+func tableMain() *widgets.Table {
+
+	headers := []string{"ID", "Name", "Type", "Status", "Error Message", "Reconnected"}
+
+	table1 := widgets.NewTable()
+
+	table1.TextStyle = ui.NewStyle(ui.ColorWhite)
+	table1.TextAlignment = ui.AlignCenter
+	table1.FillRow = true
+
+	table1.Rows = [][]string{headers}
+	table1.BorderStyle.Fg = ui.ColorCyan
+	table1.RowStyles[0] = ui.NewStyle(ui.ColorGreen, ui.ColorClear, ui.ModifierBold)
+
+	return table1
+}
+
+// Creates the fancy title font
+func createTitle(width int) (*widgets.Paragraph, int) {
+	title := widgets.NewParagraph()
+	myFigure := figure.NewFigure("SharpCD Trak", "", true)
+	figureRows := myFigure.Slicify()
+	title.Text = ""
+	titleSpace := 0
+
+	// Centers the Figure
+	if width < len(figureRows[0]) {
+		width = len(figureRows[0]) + 4
+		titleSpace = 0
+	} else {
+		titleSpace = (width-len(figureRows[0]))/2 - 2*tablePadding - 1
+	}
+
+	// Check to make sure there is room
+	if titleSpace < 1 {
+		titleSpace = 0
+	}
+
+	// Draw the Figure into a string
+	for _, row := range figureRows {
+		title.Text += (strings.Repeat(" ", titleSpace) + row + "\n")
+	}
+
+	heightTitle := len(figureRows) + tablePadding
+	title.SetRect(0, 0, width, heightTitle)
+	title.BorderStyle.Fg = ui.ColorCyan
+	title.TextStyle = ui.NewStyle(ui.ColorGreen, ui.ColorClear, ui.ModifierBold)
+
+	return title, heightTitle
+}
+
+// Creates closing screen
+func closing(width int, tablePadding int, heightLogs int) *widgets.Paragraph {
+
+	deltaYClose := heightLogs
+	heightClose := deltaYClose + 3
+
+	close := widgets.NewParagraph()
+
+	dt := time.Now()
+
+	text1 := " Press Ctrl+C to Exit"
+	text2 := dt.Format("01-02-2006 15:04:05") + " "
+	space := width - len(text1) - len(text2) - tablePadding
+
+	// Ensure the text is aligned and padded
+	close.Text = text1 + strings.Repeat(" ", space) + text2
+	close.SetRect(0, deltaYClose, width, heightClose)
+	close.BorderStyle.Fg = ui.ColorCyan
+
+	close.TextStyle = ui.NewStyle(ui.ColorGreen, ui.ColorClear, ui.ModifierBold)
+
+	return close
+}
+
+// Creates the logging page
+func logging(width int, heightTable int, urlLog string) (*widgets.Paragraph, int) {
+	logs := getAPIOutput(urlLog).Message
+
+	deltaYLogs := heightTable
+	heightLogs := deltaYLogs + 22
+
+	trakLogs := widgets.NewParagraph()
+	trakLogs.Text = "\n" + logs
+	trakLogs.SetRect(0, deltaYLogs, width, heightLogs)
+
+	trakLogs.BorderStyle.Fg = ui.ColorCyan
+	trakLogs.Title = "Live Output"
+
+	trakLogs.TitleStyle = ui.NewStyle(ui.ColorGreen, ui.ColorClear, ui.ModifierBold)
+
+	return trakLogs, heightLogs
+}
+
+// Finds the sum of ints
 func sum(array []int) int {
 	result := 0
 	for _, v := range array {
@@ -277,6 +288,7 @@ func sum(array []int) int {
 	return result
 }
 
+// Finds the longest string in column (index)
 func longest(array [][]string, index int) int {
 	longestString := 0
 
@@ -293,7 +305,7 @@ func longest(array [][]string, index int) int {
 	return longestString + 4
 }
 
-func generateColumns(rows [][]string, columns []string) []int {
+func generateColumnWidths(rows [][]string, columns []string) []int {
 
 	columnWidths := []int{}
 
@@ -305,13 +317,15 @@ func generateColumns(rows [][]string, columns []string) []int {
 }
 
 func getAPIOutput(url string) response {
-	secret := getSec()
 
+	// Insert needed data
+	secret := getSec()
 	trakPayload := trakPostData{
 		Secret:  secret,
 		Version: sharpCDVersion,
 	}
 
+	// Create request
 	jsonStr, err := json.Marshal(trakPayload)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
 	handle(err, "Failed to create request for"+url)
@@ -327,6 +341,7 @@ func getAPIOutput(url string) response {
 		},
 	}
 
+	// Do Request
 	resp, err := client.Do(req)
 	handle(err, "Failed to do POST request"+url)
 	defer resp.Body.Close()
@@ -336,9 +351,8 @@ func getAPIOutput(url string) response {
 	handle(err, "Failed to read body of response"+url)
 
 	var apiOutput response
-	if err := json.Unmarshal(body, &apiOutput); err != nil {
-		panic(err)
-	}
+	err = json.Unmarshal(body, &apiOutput)
+	handle(err, "Failed to unmarshal body"+url)
 
 	return apiOutput
 }

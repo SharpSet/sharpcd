@@ -2,11 +2,15 @@
 
 # SharpCD || Continuous Development for your server
 
-![](https://files.mcaq.me/mmtz.png)
+![](https://files.mcaq.me/zbnf.png)
 
 # Example Config
 ```yml
 version: 1
+
+trak:
+  local: https://localhost:5666
+  remote: https://mcaq.me:5666
 
 tasks:
   basic_task:

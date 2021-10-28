@@ -9,7 +9,6 @@ import (
 )
 
 var secretFlag string
-var tokenFlag string
 
 // Create Flags needed
 func init() {
@@ -18,6 +17,7 @@ func init() {
 	// Creates Helper Function
 	flag.Usage = func() {
 		fmt.Println(`
+
 Args of SharpCD:
 
 	- server: Run the sharpcd server
@@ -26,8 +26,15 @@ Args of SharpCD:
 	- changetoken: Add a token for private github repos
 	- removefilter: Remove a url for a compose file
 	- version: Returns the Current Version
+	- trak: Run the Trak program
 
-This will read the sharpdev.yml file
+Sub Command Trak:
+
+	- alljobs {type}: Get info on all jobs
+	- job {type} {id}: Get info on job with logging
+	- list {type}: Get all jobs running on sharpcd server
+
+Flags:
 		`)
 
 		flag.PrintDefaults()
