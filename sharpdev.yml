@@ -9,26 +9,40 @@ scripts:
   build: |
     go build -o ./internal/sharpcd ./src
 
-  sharpcd1: |
+  sharpcd: |
     sharpdev build
-    ./internal/sharpcd $_ARG1
+    ./internal/sharpcd $_ARG1 $_ARG2 $_ARG3 $_ARG4 $_ARG5
 
-  server: |
+  sharedserver: |
     sudo apt-get install -y lsof
     sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
     sharpdev build
+
+  server: |
+    sharpdev sharedserver
     $(sudo ./internal/sharpcd server &) &
+
+  serveropen: |
+    sharpdev sharedserver
+    sudo ./internal/sharpcd server
 
   kill: |
     sudo apt-get install -y lsof
     sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
 
-  client: |
+  shared: |
     sudo docker-compose -f "./internal/sharpcd-data/docker/external_task/docker-compose.yml" down
     $(sudo docker volume rm memes) > /dev/null 2>&1 || true
     $(sudo docker network rm memes) > /dev/null 2>&1 || true
     sharpdev build
+
+  client: |
+    sharpdev shared
     ./internal/sharpcd --secret $PASSD
+
+  clientr: |
+    sharpdev shared
+    sharpdev sharpcd --secret $PASSD --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/master/sharpcd.yml
 
   trak: |
     sharpdev build
@@ -43,15 +57,9 @@ scripts:
   traklist: |
     sharpdev trak list local
 
-
   filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
   remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/
   token: ./internal/sharpcd changetoken $_ARG1
-
-  test: |
-    git checkout dev
-    git push origin dev
-    sharpdev client
 
   alljobsd: curl -k -X POST -d SECRETD https://localhost:5666/api/jobs
   alljobs: curl -k -X POST -d SECRET https://173.212.252.82:5666/api/jobs

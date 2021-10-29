@@ -20,12 +20,27 @@ import (
 func client() {
 
 	var globalErr bool
-
-	// Get config, get data from it
-	f, err := ioutil.ReadFile("./sharpcd.yml")
 	var con config
-	err = yaml.Unmarshal(f, &con)
-	handle(err, "Failed to read and extract sharpcd.yml")
+	var err error
+	var file []byte
+
+	if len(secretFlag) == 0 {
+		resp, err := http.Get(secretFlag)
+		handle(err, "Failed to download remote sharpcd.yml")
+		defer resp.Body.Close()
+
+		if resp.StatusCode == http.StatusOK {
+			file, err = ioutil.ReadAll(resp.Body)
+			handle(err, "Failed to read remote sharpcd.yml")
+		}
+	} else {
+		// Get config, get data from it
+		file, err = ioutil.ReadFile("./sharpcd.yml")
+		handle(err, "Failed to read and extract sharpcd.yml")
+	}
+
+	err = yaml.Unmarshal(file, &con)
+	handle(err, "Failed to read yaml from sharpcd.yml")
 
 	// POST to sharpcd server for each task
 	for id, task := range con.Tasks {
@@ -183,7 +198,7 @@ func postCommChecks(t task, id string) error {
 		}
 
 		if lastIssue != job.Issue {
-			fmt.Println("No fatal Issue found: " + job.Issue)
+			fmt.Println("Non fatal Issue found: " + job.Issue)
 			lastIssue = job.Issue
 		}
 

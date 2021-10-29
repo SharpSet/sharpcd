@@ -9,10 +9,12 @@ import (
 )
 
 var secretFlag string
+var remoteFile string
 
 // Create Flags needed
 func init() {
 	flag.StringVar(&secretFlag, "secret", "", "Put secret as a arg for automation tasks")
+	flag.StringVar(&remoteFile, "remotefile", "", "Location of Remote sharpcd.yml file")
 
 	// Creates Helper Function
 	flag.Usage = func() {
