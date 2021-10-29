@@ -4,6 +4,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var sharpCDVersion = "0.2.0"
+
 type statusCodes struct {
 	NotPostMethod    int
 	Accepted         int
@@ -32,7 +34,6 @@ var (
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
-	sharpCDVersion = "0.2.0"
 )
 
 type jobStats struct {
