@@ -131,6 +131,8 @@ func postCommChecks(t task, id string) error {
 	counter := 0
 
 	fmt.Println("Waiting on server response...")
+
+	// Ensure task hasn't stopped unexpectantly early
 	for {
 		resp, code := post(payload, jobURL)
 		if code != statCode.Accepted {
@@ -148,6 +150,7 @@ func postCommChecks(t task, id string) error {
 		building := job.Status == jobStatus.Building && !buildingTriggered
 		running := job.Status == jobStatus.Running && !runningTriggered
 
+		// Marks that a new build has started
 		if building {
 			buildingTriggered = true
 			fmt.Println("The Task is now building a job")
@@ -159,6 +162,7 @@ func postCommChecks(t task, id string) error {
 			fmt.Println("Making sure it does not stop unexpectedly...")
 		}
 
+		// Marks some sort of error
 		if errored || stopped {
 			fmt.Println("Task stopped running!")
 			fmt.Println("Error Message: " + job.ErrMsg)
@@ -183,6 +187,7 @@ func postCommChecks(t task, id string) error {
 			lastIssue = job.Issue
 		}
 
+		// If 7 seconds has elapsed, comsider it started properly
 		if counter > 7 {
 			fmt.Println("Task has started Properly!")
 			return nil

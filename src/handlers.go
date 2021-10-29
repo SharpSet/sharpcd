@@ -30,8 +30,7 @@ func httpHandleAPI(w http.ResponseWriter, r *http.Request) {
 	if status == statCode.Accepted {
 
 	} else {
-		resp = response{}
-		resp.Message = getFailMessage(status)
+		resp.Message = getFailMessage(status) + " Message: " + resp.Message
 	}
 
 	json.NewEncoder(w).Encode(resp)
@@ -138,15 +137,21 @@ func checkMethod(method string) error {
 	return nil
 }
 
+// Check that client versions match
 func checkVersion(clientVersion string) error {
-	v1, err := version.NewVersion(clientVersion)
-	v2, err := version.NewVersion(sharpCDVersion)
+	if clientVersion != "" {
+		v1, err := version.NewVersion(clientVersion)
+		v2, err := version.NewVersion(sharpCDVersion)
 
-	if v1.LessThan(v2) {
-		err = errors.New("Wrong Client Version")
+		if v1.LessThan(v2) {
+			err = errors.New("Wrong Client Version")
+		}
+
+		return err
 	}
 
-	return err
+	// Means its a non-sharpcd task
+	return nil
 }
 
 // Checks if URLs are okay

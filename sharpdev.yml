@@ -9,17 +9,19 @@ scripts:
   build: |
     go build -o ./internal/sharpcd ./src
 
-  revert: git revert $_ARG1..HEAD
-  list: git branch
-  archive: |
-   git tag archive/$_ARG1 $_ARG1
-   git branch -d $_ARG1
+  sharpcd1: |
+    sharpdev build
+    ./internal/sharpcd $_ARG1
 
   server: |
     sudo apt-get install -y lsof
     sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
     sharpdev build
-    sudo ./internal/sharpcd server
+    $(sudo ./internal/sharpcd server &) &
+
+  kill: |
+    sudo apt-get install -y lsof
+    sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
 
   client: |
     sudo docker-compose -f "./internal/sharpcd-data/docker/external_task/docker-compose.yml" down
@@ -28,23 +30,37 @@ scripts:
     sharpdev build
     ./internal/sharpcd --secret $PASSD
 
-  job: curl -k -X POST -d SECRETD https://localhost:5666/api/job/$_ARG1
-  logs: curl -k -X POST -d SECRETD https://localhost:5666/api/logs/$_ARG1
+  trak: |
+    sharpdev build
+    ./internal/sharpcd --secret $PASSD trak $_ARG1 $_ARG2 $_ARG3
+
+  trakone: |
+    sharpdev trak job local $_ARG1
+
+  trakall: |
+    sharpdev trak alljobs local
+
+  traklist: |
+    sharpdev trak list local
+
+
   filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
   remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/
   token: ./internal/sharpcd changetoken $_ARG1
-  alljobsd: curl -k -X POST -d SECRETD https://localhost:5666/api/jobs
-  alljobs: curl -k -X POST -d SECRET https://173.212.252.82:5666/api/jobs
-
-  file: |
-    curl -H 'Authorization: token $_ARG1' \
-    -H 'Accept: application/vnd.github.v3.raw' \
-    -O \
-    -L https://raw.githubusercontent.com/Sharpz7/stuandbob/main/docker-compose.yml
 
   test: |
     git checkout dev
     git push origin dev
     sharpdev client
+
+  alljobsd: curl -k -X POST -d SECRETD https://localhost:5666/api/jobs
+  alljobs: curl -k -X POST -d SECRET https://173.212.252.82:5666/api/jobs
+  logsfeed: curl -k -X POST -d SECRETD https://localhost:5666/api/logsfeed/$_ARG1
+  job: curl -k -X POST -d SECRETD https://localhost:5666/api/job/$_ARG1
+  logs: curl -k -X POST -d SECRETD https://localhost:5666/api/logs/$_ARG1
+  logsremote: curl -k -X POST -d SECRET https://mcaq.me:5666/api/logs/$_ARG1
+
+  keygen: |
+    sudo openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout /home/coder/code-server/go/src/sharpCD/internal/sharpcd-data/private/server.key -out /home/coder/code-server/go/src/sharpCD/internal/sharpcd-data/private/server.crt -config /home/coder/code-server/go/src/sharpCD/testing/openssl.conf -extensions 'v3_req'
 
 
