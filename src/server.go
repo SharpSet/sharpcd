@@ -62,7 +62,7 @@ func reconnect() {
 				Reconnect: true}
 
 			newJob.ID = item.Name()
-			allJobs.List = append(allJobs.List, &newJob)
+			allJobs[newJob.ID] = &newJob
 			comm := &newJob
 			go comm.Run()
 		}
