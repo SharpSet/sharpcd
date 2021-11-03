@@ -85,24 +85,24 @@ func (job *taskJob) Run() {
 			job.DockerSetup()
 		}
 
-		// Empty the logs file
-		outfile, err := os.Create(logsLoc + "/info.log")
-		handleAPI(err, job, "Failed to create log file")
-		job.ErrMsg = ""
-
 		// Get logging Running
-		cmd = exec.Command("docker-compose", "-f", composeLoc, "logs", "-f", "--no-color")
+		cmd = exec.Command("docker-compose", "-f", composeLoc, "up", "--no-color")
 		cmd.Env = job.insertEnviroment()
-		cmd.Stdout = outfile
 	}
 
 	// If setting up the command went fine
 	if job.Status != jobStatus.Errored {
 
+		// Empty the logs file
+		outfile, err := os.Create(logsLoc + "/info.log")
+		handleAPI(err, job, "Failed to create log file")
+		job.ErrMsg = ""
+		cmd.Stdout = outfile
+
 		// Run Command
 		job.Status = jobStatus.Running
 
-		err := cmd.Run()
+		err = cmd.Run()
 		handleAPI(err, job, "Job Exited With Error")
 
 		job.Status = jobStatus.Stopped
@@ -125,7 +125,7 @@ func (job *taskJob) DockerLog(cmd *exec.Cmd) {
 		time.Sleep(1 * time.Second)
 	}
 
-	fmt.Println("Exited")
+	fmt.Println("Exited:", job.ID)
 }
 
 // Get cmd for a Docker Job
