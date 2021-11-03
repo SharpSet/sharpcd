@@ -4,7 +4,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var sharpCDVersion = "0.2.0"
+var sharpCDVersion = "3"
 
 type statusCodes struct {
 	NotPostMethod    int
@@ -36,6 +36,8 @@ var (
 	}
 )
 
+var allJobs map[string]*taskJob = make(map[string]*taskJob)
+
 type jobStats struct {
 	Running  string
 	Errored  string
@@ -62,10 +64,7 @@ type taskJob struct {
 	Registry   string            `json:"registry"`
 	Issue      string            `json:"issue"`
 	Reconnect  bool
-}
-
-type allTaskJobs struct {
-	List []*taskJob
+	Kill       bool
 }
 
 type postData struct {

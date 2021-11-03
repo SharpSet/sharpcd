@@ -1,5 +1,18 @@
 #/bin/bash
 
+if [[ $1 == "client" ]];
+then
+  # Download and unpack
+  wget https://github.com/Sharpz7/sharpcd/releases/download/XXXXX/linux.tar.gz
+  sudo mkdir -p /tmp/sharpcd
+  sudo tar -C /tmp/sharpcd -zxvf linux.tar.gz
+  sudo cp /tmp/sharpcd/sharpcd /usr/local/bin/sharpcd
+  rm -r linux.tar.gz
+
+  sharpcd --help
+  exit 0
+fi
+
 echo "Installing required modules"
 sudo apt-get install -y lsof
 
@@ -10,14 +23,11 @@ sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
 ver=$(echo $(sharpcd version) | sed "s/^.*Version: \([0-9.]*\).*/\1/")
 vernum=$(echo "$ver" | sed -r 's/[.0]+//g')
 
-if [[ $vernum =~ ^[0-9]+$ ]];
-then
-  if [[ $vernum < 0 ]];
-  then
+if [[ $vernum =~ ^[0-9]+$ ]]; then
+  if [[ $vernum < 0 ]]; then
     echo "Breaking changes: Removing old sharpcd-data"
     read -r -p "Are you sure? [y/N] " response
-    if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]
-    then
+    if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         echo "Deleting old Data..."
         sudo rm -r /usr/local/bin/sharpcd-data
     else
@@ -57,7 +67,6 @@ sudo openssl req -x509 -nodes -days 730 -newkey rsa:2048 -keyout /usr/local/bin/
 sudo chmod +x /usr/local/bin/sharpcd
 sudo chmod 755 /usr/local/bin/sharpcd
 sudo chown -R sharpcd:sharpcd /usr/local/bin/sharpcd-data
-
 
 # Create system service
 test=$(cat <<-END

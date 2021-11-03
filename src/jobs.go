@@ -2,27 +2,26 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/exec"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 )
 
-// Pointer to variable storing all jobs
-var allJobs = &allTaskJobs{}
-
 func getJob(id string) *taskJob {
 	// If there are no jobs to chose from
-	if len(allJobs.List) == 0 {
+	if len(allJobs) == 0 {
 		return nil
 	}
 
 	// Return a job with the matching ID
-	for _, job := range allJobs.List {
+	for _, job := range allJobs {
 		if job.ID == id {
 			return job
 		}
@@ -40,21 +39,25 @@ func createJob(payload postData) {
 		URL:        payload.GitURL + payload.Compose,
 		Enviroment: payload.Enviroment,
 		Registry:   payload.Registry,
-		Reconnect:  false}
+		ErrMsg:     "",
+		Reconnect:  false,
+		Kill:       false}
 
 	// If a job with that ID already exists
 	if job := getJob(payload.ID); job != nil {
 
-		// Assign its ID to the old job ID
-		newJob.ID = job.ID
+		// Kill the old jobs logging
+		job.Kill = true
 
-		// Replace and run the new job
-		*job = newJob
-		job.Run()
+		newJob.ID = job.ID
+		allJobs[payload.ID] = &newJob
+
+		newJob.Run()
 
 	} else {
 		newJob.ID = payload.ID
-		allJobs.List = append(allJobs.List, &newJob)
+
+		allJobs[newJob.ID] = &newJob
 		comm := &newJob
 		comm.Run()
 	}
@@ -65,31 +68,68 @@ func (job *taskJob) Run() {
 
 	var cmd *exec.Cmd
 
+	// All Location Data
+	id := job.ID
+	logsLoc := folder.Docker + id
+	composeLoc := folder.Docker + id + "/docker-compose.yml"
+
 	// Mark as building
 	job.Status = jobStatus.Building
 
 	// Run the correct job Type
 	switch job.Type {
 	case "docker":
-		cmd = job.DockerCmd()
+
+		// Setup the job
+		if job.Reconnect != true {
+			job.DockerSetup()
+		}
+
+		// Get logging Running
+		cmd = exec.Command("docker-compose", "-f", composeLoc, "up", "--no-color")
+		cmd.Env = job.insertEnviroment()
 	}
 
 	// If setting up the command went fine
 	if job.Status != jobStatus.Errored {
 
+		// Empty the logs file
+		outfile, err := os.Create(logsLoc + "/info.log")
+		handleAPI(err, job, "Failed to create log file")
+		job.ErrMsg = ""
+		cmd.Stdout = outfile
+
 		// Run Command
 		job.Status = jobStatus.Running
 
-		err := cmd.Run()
+		err = cmd.Run()
 		handleAPI(err, job, "Job Exited With Error")
 
 		job.Status = jobStatus.Stopped
 
+		fmt.Println("Stopped:", job.ID, "Kill:", job.Kill)
+
+		go job.DockerLog(cmd)
+
 	}
 }
 
+// Log the dockerfile until the job has been killed
+func (job *taskJob) DockerLog(cmd *exec.Cmd) {
+
+	fmt.Println("Running extended logs")
+
+	for job.Kill == false {
+		cmd.Run()
+
+		time.Sleep(1 * time.Second)
+	}
+
+	fmt.Println("Exited:", job.ID)
+}
+
 // Get cmd for a Docker Job
-func (job *taskJob) DockerCmd() *exec.Cmd {
+func (job *taskJob) DockerSetup() {
 
 	// All Location Data
 	id := job.ID
@@ -97,97 +137,81 @@ func (job *taskJob) DockerCmd() *exec.Cmd {
 	logsLoc := folder.Docker + id
 	composeLoc := folder.Docker + id + "/docker-compose.yml"
 
-	var err error
-
-	if job.Reconnect != true {
-		// Get github token
-		f, err := readFilter()
-		if err != nil {
-			handleAPI(err, job, "Failed to get Token")
-		}
-
-		// Make url, read the compose file
-		req, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			handleAPI(err, job, "Failed to build request")
-		}
-
-		if f.Token != "" {
-			req.Header.Set("Authorization", "token "+f.Token)
-			req.Header.Set("Accept", "application/vnd.github.v3.raw")
-		}
-
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			handleAPI(err, job, "Failed to get compose URL")
-		}
-		defer resp.Body.Close()
-		file, err := ioutil.ReadAll(resp.Body)
-		handleAPI(err, job, "Failed to read compose file")
-
-		// Make directory for docker and logs and save file
-		os.Mkdir(folder.Docker+id, 0777)
-		os.Mkdir(logsLoc, 0777)
-
-		if strings.Contains(string(file), "404") {
-			err = errors.New("404 in Compose File")
-			text := "Github Token invalid or wrong compose URL"
-			handleAPI(err, job, text)
-			job.Issue = text
-		}
-
-		// If Token was valid and compose file not empty
-		if err == nil {
-
-			// Ensure ComposeLoc is Empty
-			_, err = os.Stat(composeLoc)
-			if err == nil {
-				err = os.Remove(composeLoc)
-
-				if err != nil {
-					handleAPI(err, job, "Failed to Remove")
-				}
-			}
-
-			// Write to file
-			err = ioutil.WriteFile(composeLoc, file, 0777)
-			handleAPI(err, job, "Failed to write to file")
-		}
-
-		if job.Registry != "" {
-			job.dockerLogin()
-		}
-
-		// Pull new images
-		job.buildCommand("-f", composeLoc, "pull")
-
-		// Make sure config is valid
-		err = job.buildCommand("-f", composeLoc, "up", "--no-start")
-		if err == nil {
-			// Remove any previous containers
-			// Deals with any network active endpoints
-			job.buildCommand("-f", composeLoc, "down", "--remove-orphans")
-
-			// Run Code
-			job.buildCommand("-f", composeLoc, "up", "-d")
-
-			if job.Registry != "" {
-				job.dockerLogout()
-			}
-		} else {
-			return nil
-		}
+	// Get github token
+	f, err := readFilter()
+	if err != nil {
+		handleAPI(err, job, "Failed to get Token")
 	}
 
-	// Get logging Running
-	cmd := exec.Command("docker-compose", "-f", composeLoc, "logs", "-f", "--no-color")
+	// Make url, read the compose file
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		handleAPI(err, job, "Failed to build request")
+	}
 
-	outfile, err := os.Create(logsLoc + "/info.log")
-	handleAPI(err, job, "Failed to create log file")
-	cmd.Env = job.insertEnviroment()
-	cmd.Stdout = outfile
+	if f.Token != "" {
+		req.Header.Set("Authorization", "token "+f.Token)
+		req.Header.Set("Accept", "application/vnd.github.v3.raw")
+	}
 
-	return cmd
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		handleAPI(err, job, "Failed to get compose URL")
+	}
+	defer resp.Body.Close()
+	file, err := ioutil.ReadAll(resp.Body)
+	handleAPI(err, job, "Failed to read compose file")
+
+	// Make directory for docker and logs and save file
+	os.Mkdir(folder.Docker+id, 0777)
+	os.Mkdir(logsLoc, 0777)
+
+	if strings.Contains(string(file), "404") {
+		err = errors.New("404 in Compose File")
+		text := "Github Token invalid or wrong compose URL"
+		handleAPI(err, job, text)
+		job.Issue = text
+	}
+
+	// If Token was valid and compose file not empty
+	if err == nil {
+
+		// Ensure ComposeLoc is Empty
+		_, err = os.Stat(composeLoc)
+		if err == nil {
+			err = os.Remove(composeLoc)
+
+			if err != nil {
+				handleAPI(err, job, "Failed to Remove")
+			}
+		}
+
+		// Write to file
+		err = ioutil.WriteFile(composeLoc, file, 0777)
+		handleAPI(err, job, "Failed to write to file")
+	}
+
+	if job.Registry != "" {
+		job.dockerLogin()
+	}
+
+	// Pull new images
+	job.buildCommand("-f", composeLoc, "pull")
+
+	// Make sure config is valid
+	err = job.buildCommand("-f", composeLoc, "up", "--no-start")
+	if err == nil {
+		// Remove any previous containers
+		// Deals with any network active endpoints
+		job.buildCommand("-f", composeLoc, "down", "--remove-orphans")
+
+		// Run Code
+		job.buildCommand("-f", composeLoc, "up", "-d")
+
+		if job.Registry != "" {
+			job.dockerLogout()
+		}
+	}
 }
 
 func (job *taskJob) insertEnviroment() []string {

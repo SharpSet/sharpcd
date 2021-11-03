@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -54,7 +55,8 @@ func listJobs() {
 
 	urlJobs := con.Trak[location] + "/api/jobs/"
 
-	jobs := getAPIOutput(urlJobs).Jobs
+	apiOutput, _ := getAPIOutput(urlJobs)
+	jobs := apiOutput.Jobs
 
 	for _, job := range jobs {
 		jobIDs = append(jobIDs, "  - "+job.ID)
@@ -95,7 +97,15 @@ func liveFeed() {
 	}
 
 	// Tests to ensure you can actually reach the server
-	getAPIOutput(urlJobs)
+	apiOutput, code := getAPIOutput(urlJobs)
+
+	if code == statCode.Accepted {
+		fmt.Printf("Connection to API...")
+	} else {
+		fmt.Println(apiOutput.Message)
+		fmt.Printf("APi Connection Failed!\n")
+		os.Exit(1)
+	}
 
 	// Load UI
 	if err := ui.Init(); err != nil {
@@ -111,14 +121,16 @@ func liveFeed() {
 
 		// Gets all rows if there is one job
 		if trakArg == trakOne {
-			job := getAPIOutput(urlJob).Job
+			apiOutput, _ := getAPIOutput(urlJob)
+			job := apiOutput.Job
 
 			jobs = append(jobs, job)
 		}
 
 		// Gets all rows if there is there are multiple jobs
 		if trakArg == trakAll {
-			jobs = getAPIOutput(urlJobs).Jobs
+			apiOutput, _ = getAPIOutput(urlJobs)
+			jobs = apiOutput.Jobs
 		}
 
 		// Adds in a row for each job
@@ -262,13 +274,14 @@ func closing(width int, tablePadding int, heightLogs int) *widgets.Paragraph {
 
 // Creates the logging page
 func logging(width int, heightTable int, urlLog string) (*widgets.Paragraph, int) {
-	logs := getAPIOutput(urlLog).Message
+	logs, _ := getAPIOutput(urlLog)
+	msg := logs.Message
 
 	deltaYLogs := heightTable
 	heightLogs := deltaYLogs + 22
 
 	trakLogs := widgets.NewParagraph()
-	trakLogs.Text = "\n" + logs
+	trakLogs.Text = "\n" + msg
 	trakLogs.SetRect(0, deltaYLogs, width, heightLogs)
 
 	trakLogs.BorderStyle.Fg = ui.ColorCyan
@@ -316,7 +329,7 @@ func generateColumnWidths(rows [][]string, columns []string) []int {
 	return columnWidths
 }
 
-func getAPIOutput(url string) response {
+func getAPIOutput(url string) (response, int) {
 
 	// Insert needed data
 	secret := getSec()
@@ -343,7 +356,7 @@ func getAPIOutput(url string) response {
 
 	// Do Request
 	resp, err := client.Do(req)
-	handle(err, "Failed to do POST request"+url)
+	handle(err, "Failed to connect to SharpCD Trak: "+url)
 	defer resp.Body.Close()
 
 	// Read Body and Status
@@ -354,5 +367,5 @@ func getAPIOutput(url string) response {
 	err = json.Unmarshal(body, &apiOutput)
 	handle(err, "Failed to unmarshal body"+url)
 
-	return apiOutput
+	return apiOutput, resp.StatusCode
 }
