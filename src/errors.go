@@ -1,11 +1,10 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"log"
 	"os"
 
+	ui "github.com/gizak/termui"
 	"github.com/joho/godotenv"
 )
 
@@ -19,8 +18,9 @@ func handle(e error, msg string) {
 		if os.Getenv("DEV") == "TRUE" {
 			fmt.Println(e)
 		}
-		log.Fatal(msg)
-		flag.Usage()
+		ui.Close()
+		fmt.Print(msg)
+		os.Exit(1)
 	}
 }
 

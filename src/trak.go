@@ -23,7 +23,14 @@ import (
 
 var tablePadding int = 2
 
+var forceEnd = make(chan int)
+
 func trak() {
+
+	if len(flag.Args()) < 2 {
+		handle(errors.New(""), "No valid trak arg was given")
+		flag.Usage()
+	}
 
 	var trakArg = flag.Args()[1]
 
@@ -43,6 +50,11 @@ func trak() {
 
 // Lists all jobs running on server
 func listJobs() {
+	if len(flag.Args()) < 3 {
+		handle(errors.New(""), "No valid location was given")
+		flag.Usage()
+	}
+
 	var location = flag.Args()[2]
 
 	var jobIDs []string
@@ -55,7 +67,10 @@ func listJobs() {
 
 	urlJobs := con.Trak[location] + "/api/jobs/"
 
-	apiOutput, _ := getAPIOutput(urlJobs)
+	// Insert needed data
+	secret := getSec()
+
+	apiOutput, _ := getAPIOutput(urlJobs, secret)
 	jobs := apiOutput.Jobs
 
 	for _, job := range jobs {
@@ -77,6 +92,11 @@ func liveFeed() {
 	var trakAll string = "alljobs"
 	var trakOne string = "job"
 
+	if len(flag.Args()) < 3 {
+		handle(errors.New(""), "No valid location was given")
+		flag.Usage()
+	}
+
 	var trakArg = flag.Args()[1]
 	var location = flag.Args()[2]
 
@@ -90,14 +110,22 @@ func liveFeed() {
 
 	// Only needed for single job requests
 	if trakArg == trakOne {
+		if len(flag.Args()) < 3 {
+			handle(errors.New(""), "No valid Job ID was given")
+			flag.Usage()
+		}
+
 		var jobID = flag.Args()[3]
 
 		urlJob = con.Trak[location] + "/api/job/" + jobID
 		urlLog = con.Trak[location] + "/api/logsfeed/" + jobID
 	}
 
+	// Insert needed data
+	secret := getSec()
+
 	// Tests to ensure you can actually reach the server
-	apiOutput, code := getAPIOutput(urlJobs)
+	apiOutput, code := getAPIOutput(urlJobs, secret)
 
 	if code == statCode.Accepted {
 		fmt.Printf("Connection to API...")
@@ -121,7 +149,7 @@ func liveFeed() {
 
 		// Gets all rows if there is one job
 		if trakArg == trakOne {
-			apiOutput, _ := getAPIOutput(urlJob)
+			apiOutput, _ := getAPIOutput(urlJob, secret)
 			job := apiOutput.Job
 
 			jobs = append(jobs, job)
@@ -129,7 +157,7 @@ func liveFeed() {
 
 		// Gets all rows if there is there are multiple jobs
 		if trakArg == trakAll {
-			apiOutput, _ = getAPIOutput(urlJobs)
+			apiOutput, _ = getAPIOutput(urlJobs, secret)
 			jobs = apiOutput.Jobs
 		}
 
@@ -166,7 +194,7 @@ func liveFeed() {
 		var trakLogs *widgets.Paragraph
 
 		if trakArg == trakOne {
-			trakLogs, heightLogs = logging(width, heightTable, urlLog)
+			trakLogs, heightLogs = logging(width, heightTable, urlLog, secret)
 			ui.Render(trakLogs)
 		} else {
 			heightLogs = heightTable
@@ -191,6 +219,7 @@ func liveFeed() {
 			}
 		case <-ticker:
 			draw()
+
 		}
 	}
 
@@ -273,8 +302,8 @@ func closing(width int, tablePadding int, heightLogs int) *widgets.Paragraph {
 }
 
 // Creates the logging page
-func logging(width int, heightTable int, urlLog string) (*widgets.Paragraph, int) {
-	logs, _ := getAPIOutput(urlLog)
+func logging(width int, heightTable int, urlLog string, secret string) (*widgets.Paragraph, int) {
+	logs, _ := getAPIOutput(urlLog, secret)
 	msg := logs.Message
 
 	deltaYLogs := heightTable
@@ -329,10 +358,8 @@ func generateColumnWidths(rows [][]string, columns []string) []int {
 	return columnWidths
 }
 
-func getAPIOutput(url string) (response, int) {
+func getAPIOutput(url string, secret string) (response, int) {
 
-	// Insert needed data
-	secret := getSec()
 	trakPayload := trakPostData{
 		Secret:  secret,
 		Version: sharpCDVersion,
