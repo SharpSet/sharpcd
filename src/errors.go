@@ -19,7 +19,7 @@ func handle(e error, msg string) {
 			fmt.Println(e)
 		}
 		ui.Close()
-		fmt.Print(msg)
+		fmt.Println(msg)
 		os.Exit(1)
 	}
 }
