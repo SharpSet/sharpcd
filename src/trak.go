@@ -42,8 +42,8 @@ func trak() {
 	case "list":
 		listJobs()
 	default:
-		handle(errors.New(""), "No valid trak arg was given")
 		flag.Usage()
+		handle(errors.New(""), "No valid trak arg was given")
 	}
 
 }
@@ -51,8 +51,8 @@ func trak() {
 // Lists all jobs running on server
 func listJobs() {
 	if len(flag.Args()) < 3 {
-		handle(errors.New(""), "No valid location was given")
 		flag.Usage()
+		handle(errors.New(""), "No valid location was given")
 	}
 
 	var location = flag.Args()[2]
@@ -93,8 +93,8 @@ func liveFeed() {
 	var trakOne string = "job"
 
 	if len(flag.Args()) < 3 {
-		handle(errors.New(""), "No valid location was given")
 		flag.Usage()
+		handle(errors.New(""), "No valid location was given")
 	}
 
 	var trakArg = flag.Args()[1]
@@ -111,8 +111,8 @@ func liveFeed() {
 	// Only needed for single job requests
 	if trakArg == trakOne {
 		if len(flag.Args()) < 3 {
-			handle(errors.New(""), "No valid Job ID was given")
 			flag.Usage()
+			handle(errors.New(""), "No valid Job ID was given")
 		}
 
 		var jobID = flag.Args()[3]

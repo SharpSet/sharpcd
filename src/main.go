@@ -19,6 +19,7 @@ func init() {
 	// Creates Helper Function
 	flag.Usage = func() {
 		fmt.Println(`
+
 Args of SharpCD:
 
 	- server: Run the sharpcd server
@@ -31,9 +32,14 @@ Args of SharpCD:
 
 Sub Command Trak:
 
-	- alljobs {type}: Get info on all jobs
-	- job {type} {id}: Get info on job with logging
-	- list {type}: Get all jobs running on sharpcd server
+	- sharpcd trak alljobs {location} {type}
+		Get info on all jobs
+
+	- sharpcd trak job {location} {type} {id}
+		Get info on job with logging
+
+	- sharpcd trak list {location} {type}
+		Get all jobs running on sharpcd server
 
 Flags:
 		`)
@@ -71,8 +77,8 @@ func main() {
 		case "version":
 			fmt.Println("Version: " + sharpCDVersion)
 		default:
-			log.Fatal("This subcommand does not exist!")
 			flag.Usage()
+			log.Fatal("This subcommand does not exist!")
 		}
 	}
 	return

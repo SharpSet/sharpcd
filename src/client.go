@@ -24,8 +24,8 @@ func client() {
 	var err error
 	var file []byte
 
-	if len(secretFlag) != 0 {
-		resp, err := http.Get(secretFlag)
+	if len(remoteFile) != 0 {
+		resp, err := http.Get(remoteFile)
 		handle(err, "Failed to download remote sharpcd.yml")
 		defer resp.Body.Close()
 
@@ -106,7 +106,7 @@ func post(payload postData, url string) (response, int) {
 
 	// Do Request
 	resp, err := client.Do(req)
-	handle(err, "Failed to do POST request")
+	handle(err, "Failed to do POST request to "+url)
 	defer resp.Body.Close()
 
 	// Read Body and Status
