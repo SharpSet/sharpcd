@@ -4,7 +4,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var sharpCDVersion = "3.2"
+var sharpCDVersion = "3.3"
 
 type statusCodes struct {
 	NotPostMethod    int
