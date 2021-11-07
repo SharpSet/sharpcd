@@ -41,11 +41,41 @@ func trak() {
 		liveFeed()
 	case "list":
 		listJobs()
+	case "logs":
+		apiLog()
 	default:
 		flag.Usage()
 		handle(errors.New(""), "No valid trak arg was given")
 	}
 
+}
+
+// Get log file from job
+func apiLog() {
+	if len(flag.Args()) < 3 {
+		flag.Usage()
+		handle(errors.New(""), "No valid location was given")
+	}
+
+	var location = flag.Args()[2]
+	var jobID = flag.Args()[3]
+
+	// Get sharpcd file
+	f, err := ioutil.ReadFile("./sharpcd.yml")
+	var con config
+	err = yaml.Unmarshal(f, &con)
+	handle(err, "Failed to read and extract sharpcd.yml")
+
+	urlJobs := con.Trak[location] + "/api/logs/" + jobID
+
+	// Insert needed data
+	secret := getSec()
+
+	apiOutput, _ := getAPIOutput(urlJobs, secret)
+	logMsg := apiOutput.Message
+
+	fmt.Println("\nLogs from " + con.Trak[location] + ":\n")
+	fmt.Println(logMsg + "\n")
 }
 
 // Lists all jobs running on server
@@ -110,7 +140,7 @@ func liveFeed() {
 
 	// Only needed for single job requests
 	if trakArg == trakOne {
-		if len(flag.Args()) < 3 {
+		if len(flag.Args()) < 4 {
 			flag.Usage()
 			handle(errors.New(""), "No valid Job ID was given")
 		}

@@ -62,12 +62,15 @@ scripts:
   traklist: |
     sharpdev trak list local
 
+  traklogs: |
+    sharpdev trak logs local $_ARG1
+
   filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
   remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/
   token: ./internal/sharpcd changetoken $_ARG1
 
   alljobsd: curl -k -X POST -d SECRETD https://localhost:5666/api/jobs
-  alljobs: curl -k -X POST -d SECRET https://173.212.252.82:5666/api/jobs
+  alljobs: curl -k -X POST -d SECRET https://173.312.252.82:5666/api/jobs
   logsfeed: curl -k -X POST -d SECRETD https://localhost:5666/api/logsfeed/$_ARG1
   job: curl -k -X POST -d SECRETD https://localhost:5666/api/job/$_ARG1
   logs: curl -k -X POST -d SECRETD https://localhost:5666/api/logs/$_ARG1
