@@ -17,12 +17,14 @@ import (
 func getJob(id string) *taskJob {
 	// If there are no jobs to chose from
 	if len(allJobs) == 0 {
+		fmt.Println("DEBUG: No Jobs to choose from for", id)
 		return nil
 	}
 
 	// Return a job with the matching ID
 	for _, job := range allJobs {
 		if job.ID == id {
+			fmt.Println("DEBUG: Found a matching ID for", id)
 			return job
 		}
 	}
@@ -46,6 +48,7 @@ func createJob(payload postData) {
 	// If a job with that ID already exists
 	if job := getJob(payload.ID); job != nil {
 
+		fmt.Println("DEBUG:", payload.ID, "already exists")
 		// Kill the old jobs logging
 		job.Kill = true
 
@@ -92,6 +95,8 @@ func (job *taskJob) Run() {
 
 	// If setting up the command went fine
 	if job.Status != jobStatus.Errored {
+
+		fmt.Println("DEBUG:", id, "command setup went fine")
 
 		// Empty the logs file
 		outfile, err := os.Create(logsLoc + "/info.log")

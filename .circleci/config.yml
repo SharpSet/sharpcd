@@ -1,8 +1,8 @@
 version: 2.1
 
 orbs:
-  release: sharptools/release@0.0.3
-  go: sharptools/go@0.0.7
+  release: sharptools/release@volatile
+  go: sharptools/go@volatile
 
 
 workflows:

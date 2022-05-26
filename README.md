@@ -41,22 +41,19 @@ tasks:
 # Installation
 On linux, just run:
 ```console
-╭─adam@box ~/
-╰─➤  sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/3.3/install.sh | sudo bash
+sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/3.4/install.sh | sudo bash
 ```
 
 Or for just the client:
 ```console
-╭─adam@box ~/
-╰─➤  sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/3.3/install.sh | sudo bash -s client
+sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/3.4/install.sh | sudo bash -s client
 ```
 
 ## Command Options
 
 On linux, just run:
 ```console
-╭─adam@box ~/
-╰─➤  sharpcd help
+foo@bar:~$ sharpcd help
 
 Args of SharpCD:
 
@@ -70,12 +67,22 @@ Args of SharpCD:
 
 Sub Command Trak:
 
-        - alljobs {type}: Get info on all jobs
-        - job {type} {id}: Get info on job with logging
-        - list {type}: Get all jobs running on sharpcd server
+        - sharpcd trak alljobs {location} {type}
+                Get info on all jobs
+
+        - sharpcd trak job {location} {type} {job_id}
+                Get info on job with logging
+
+        - sharpcd trak list {location} {type}
+                Get all jobs running on sharpcd server
+
+        - sharpcd trak logs {location} {job_id}
+                Get Logs from a Job
 
 Flags:
 
+  -remotefile string
+        Location of Remote sharpcd.yml file
   -secret string
         Put secret as a arg for automation tasks
 ```
@@ -83,3 +90,9 @@ Flags:
 ## Maintainers
 
 - [Adam McArthur](https://adam.mcaq.me)
+
+
+## To Do
+
+- Viewing a job causes disconnect after a certain time
+- Add more client-only server commands like logs and "enter" i.e exec /bin/sh

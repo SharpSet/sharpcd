@@ -14,13 +14,12 @@ scripts:
     ./internal/sharpcd $_ARG1 $_ARG2 $_ARG3 $_ARG4 $_ARG5
 
   sharedserver: |
-    sudo apt-get install -y lsof
-    sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
+    sharpdev kill
     sharpdev build
 
   server: |
     sharpdev sharedserver
-    $(sudo ./internal/sharpcd server) &
+    sudo ./internal/sharpcd server > /dev/null 2>&1 &
 
   serveropen: |
     sharpdev sharedserver
@@ -28,12 +27,15 @@ scripts:
 
   test: |
     sharpdev server
+    sharpdev client
+    echo
     sharpdev clientr
     sharpdev kill
 
   kill: |
     sudo apt-get install -y lsof
-    sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
+
+    sudo lsof -ti :5666 | sudo xargs --no-run-if-empty kill -9
 
   shared: |
     sudo docker-compose -f "./internal/sharpcd-data/docker/external_task/docker-compose.yml" down
