@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	ui "github.com/gizak/termui"
+	ui "github.com/gizak/termui/v3"
 	"github.com/joho/godotenv"
 )
 

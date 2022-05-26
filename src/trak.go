@@ -16,8 +16,8 @@ import (
 	"time"
 
 	"github.com/common-nighthawk/go-figure"
-	ui "github.com/gizak/termui"
-	"github.com/gizak/termui/widgets"
+	ui "github.com/gizak/termui/v3"
+	"github.com/gizak/termui/v3/widgets"
 	"gopkg.in/yaml.v2"
 )
 

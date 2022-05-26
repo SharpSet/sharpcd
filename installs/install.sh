@@ -16,6 +16,8 @@ fi
 echo "Installing required modules"
 sudo apt-get install -y lsof
 
+daemon_installed=$(sudo lsof -t -i:5666)
+
 # Uninstall any previous versions.
 echo "Checking for any previous version..."
 sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
@@ -23,9 +25,15 @@ sudo kill $(sudo lsof -t -i:5666) > /dev/null 2>&1 || true
 ver=$(echo $(sharpcd version) | sed "s/^.*Version: \([0-9.]*\).*/\1/")
 vernum=$(echo "$ver" | sed -r 's/[.0]+//g')
 
+# set breaking_version to $vernum < X
+# Note that 4.4 => 44
+breaking_version=$([[ $vernum < 0 ]] && echo "true" || echo "false")
+
 if [[ $vernum =~ ^[0-9]+$ ]]; then
-  if [[ $vernum < 0 ]]; then
-    echo "Breaking changes: Removing old sharpcd-data"
+  # Set to 0 as there is no breaking version.
+  if [[ $breaking_version == "true" ]]; then
+    echo ""
+    echo "BREAKING CHANGES: Removing old sharpcd-data"
     read -r -p "Are you sure? [y/N] " response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
         echo "Deleting old Data..."
@@ -49,10 +57,10 @@ rm -r linux.tar.gz
 
 # Create SharpCD User
 if !(grep -c '^sharpcd:' /etc/passwd) then
-    sudo chown sharpcd:sharpcd /usr/local/bin/docker-compose
     sudo useradd sharpcd
     sudo mkdir /home/sharpcd
     sudo chown -R sharpcd:sharpcd /home/sharpcd
+    sudo chown sharpcd:sharpcd /usr/local/bin/docker-compose
     sudo groupadd docker
     sudo usermod -aG docker sharpcd
     sudo systemctl restart docker
@@ -93,18 +101,44 @@ sudo sharpcd --secret Pass123 setsecret
 sudo systemctl restart sharpcd
 
 echo ""
+echo ""
 echo "SHARPCD IS NOW RUNNING"
 echo "======================="
-echo "Your password is (Pass123). it is highly recommended you change this."
-echo "The sharpcd server has now started and will startup on a reboot"
-echo "Do sharpcd -h for more info!"
-sharpcd --help
 echo ""
-echo "PLEASE NOTE"
-echo "======================"
 echo "SharpCD will be open on port 5666"
-echo "Use the follow IP table commands to block port 5666 from outside localhost"
+echo "Use the follow IP table commands to block port 5666 from outside localhost:"
+echo ""
 echo "sudo iptables -D INPUT -p tcp --dport 5666 -s localhost -j ACCEPT"
 echo "sudo iptables -D INPUT -p tcp --dport 5666 -j DROP"
 echo "sudo iptables -A INPUT -p tcp --dport 5666 -s localhost -j ACCEPT"
 echo "sudo iptables -A INPUT -p tcp --dport 5666 -j DROP"
+
+echo ""
+
+echo "Press any key to continue..."
+read -n 1 -s
+echo ""
+
+daemon_installed="374594"
+# if $daemon_installed is false or breaking_version
+if [[ $daemon_installed == "" || $breaking_version == "true" ]];
+then
+  echo "Please choose a password for your SharpCD server"
+  sudo sharpcd setsecret
+
+  echo "Please choose a valid github repository for your SharpCD server"
+  echo "This is the only repository that SharpCD will accept compose files from"
+  echo "Should be in the form https://raw.githubusercontent.com/{USER}/"
+  echo ""
+
+  read -p "Enter your repository name: " filter_loc
+  sudo sharpcd addfilter $filter_loc
+fi
+
+
+
+echo ""
+echo "SHARPCD IS NOW READY"
+echo "====================="
+echo "To learn more use sharpcd --help"
+echo ""

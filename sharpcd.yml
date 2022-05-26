@@ -1,4 +1,4 @@
-version: 1
+version: 1.1
 
 trak:
   local: https://localhost:5666
@@ -43,6 +43,9 @@ tasks:
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
     compose: /sharpcd/dev/testing/env.yml
+    depends:
+      - env_task
+      - basic_task
 
   file_task:
     name: No Compose File
@@ -50,6 +53,8 @@ tasks:
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
     compose: /sharpcd/dev/testing/basic
+    depends:
+      - env_task2
 
   restart_task:
     name: Test Log exit
@@ -64,3 +69,5 @@ tasks:
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
     compose: /sharpcd/dev/testing/trak.yml
+    depends:
+      - file_task

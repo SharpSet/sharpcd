@@ -32,14 +32,17 @@ Args of SharpCD:
 
 Sub Command Trak:
 
-	- sharpcd trak alljobs {location} {type}
+	- sharpcd trak alljobs {location}
 		Get info on all jobs
 
-	- sharpcd trak job {location} {type} {id}
+	- sharpcd trak job {location} {type} {job_id}
 		Get info on job with logging
 
-	- sharpcd trak list {location} {type}
+	- sharpcd trak list {location}
 		Get all jobs running on sharpcd server
+
+	- sharpcd trak logs {location} {job_id}
+		Get Logs from a Job
 
 Flags:
 		`)
