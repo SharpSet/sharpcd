@@ -97,7 +97,6 @@ sudo echo "$test" | sudo tee -a /etc/systemd/system/sharpcd.service
 sudo systemctl enable sharpcd
 
 # Initial Run
-sudo sharpcd --secret Pass123 setsecret
 sudo systemctl restart sharpcd
 
 echo ""
@@ -115,11 +114,9 @@ echo "sudo iptables -A INPUT -p tcp --dport 5666 -j DROP"
 
 echo ""
 
-echo "Press any key to continue..."
-read -n 1 -s
+read -p "Press enter to continue"
 echo ""
 
-daemon_installed="374594"
 # if $daemon_installed is false or breaking_version
 if [[ $daemon_installed == "" || $breaking_version == "true" ]];
 then
