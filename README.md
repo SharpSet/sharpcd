@@ -1,6 +1,6 @@
 [![CircleCI](https://circleci.com/gh/Sharpz7/sharpcd.svg?style=svg)](https://circleci.com/gh/Sharpz7/sharpcd)
 
-# SharpCD || Continuous Development for your server
+# SharpCD || Continuous Development for your server!
 
 ![](https://files.mcaq.me/zbnf.png)
 
