@@ -50,7 +50,9 @@ func client() {
 		id := strings.ToLower(id)
 		id = strings.ReplaceAll(id, " ", "_")
 
-		resp = runTask(id, task, &tasksRun, con, level)
+		secret := getSec()
+
+		resp = runTask(id, task, &tasksRun, con, level, secret)
 	}
 
 	if resp {
@@ -59,7 +61,7 @@ func client() {
 	}
 }
 
-func runTask(id string, task task, tasksRun *[]string, con config, level int) (response bool) {
+func runTask(id string, task task, tasksRun *[]string, con config, level int, secret string) (response bool) {
 	response = false
 
 	// if level is above 10, exit
@@ -79,14 +81,14 @@ func runTask(id string, task task, tasksRun *[]string, con config, level int) (r
 		Compose:    task.Compose,
 		Enviroment: getEnviroment(task.Envfile),
 		Registry:   task.Registry,
-		Secret:     getSec(),
+		Secret:     secret,
 		Version:    sharpCDVersion}
 
 	// check for task dependencies
 	if len(task.Depends) != 0 {
 		for _, taskDep := range task.Depends {
 			level++
-			runTask(taskDep, con.Tasks[taskDep], tasksRun, con, level)
+			runTask(taskDep, con.Tasks[taskDep], tasksRun, con, level, secret)
 		}
 	}
 
@@ -101,8 +103,17 @@ func runTask(id string, task task, tasksRun *[]string, con config, level int) (r
 
 	if !alreadyRun {
 
+		var url string
+
+		// if the sharpurl flag is set, use it
+		if len(sharpURL) != 0 {
+			url = sharpURL
+		} else {
+			url = task.SharpURL
+		}
+
 		// Make POST request and let user know if successful
-		body, code := post(payload, task.SharpURL)
+		body, code := post(payload, url)
 		if code == statCode.Accepted {
 			fmt.Printf("Task [%s] succesfully sent!\n", task.Name)
 			fmt.Println("=================")
