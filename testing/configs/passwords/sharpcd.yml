@@ -11,3 +11,11 @@ tasks:
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
     compose: /sharpcd/dev/testing/basic.yml
+
+  env_task:
+    name: Enviroment Test Pass
+    type: docker
+    envfile: ./testing/.env
+    sharpurl: https://localhost:5666
+    giturl: https://raw.githubusercontent.com/Sharpz7/
+    compose: /sharpcd/dev/testing/env.yml
