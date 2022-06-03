@@ -37,7 +37,7 @@ Sub Command Trak:
 	- sharpcd trak alljobs {location}
 		Get info on all jobs
 
-	- sharpcd trak job {location} {type} {job_id}
+	- sharpcd trak job {location} {job_id}
 		Get info on job with logging
 
 	- sharpcd trak list {location}

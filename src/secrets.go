@@ -9,6 +9,7 @@ import (
 )
 
 var hashLoc = folder.Private + "/hash.secret"
+var secCache string
 
 func checkSecret(sec string) error {
 
@@ -24,6 +25,11 @@ func checkSecret(sec string) error {
 
 func getSec() string {
 
+	// if cache is set, return that
+	if len(secCache) != 0 {
+		return secCache
+	}
+
 	// If secret is not in args
 	if len(secretFlag) == 0 {
 
@@ -31,6 +37,9 @@ func getSec() string {
 		fmt.Println("Enter secret: ")
 		sec, err := terminal.ReadPassword(0)
 		handle(err, "Failed to read secret")
+
+		// set cache
+		secCache = string(sec)
 		return string(sec)
 	}
 

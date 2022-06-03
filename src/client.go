@@ -50,9 +50,7 @@ func client() {
 		id := strings.ToLower(id)
 		id = strings.ReplaceAll(id, " ", "_")
 
-		secret := getSec()
-
-		resp = runTask(id, task, &tasksRun, con, level, secret)
+		resp = runTask(id, task, &tasksRun, con, level)
 	}
 
 	if resp {
@@ -61,7 +59,7 @@ func client() {
 	}
 }
 
-func runTask(id string, task task, tasksRun *[]string, con config, level int, secret string) (response bool) {
+func runTask(id string, task task, tasksRun *[]string, con config, level int) (response bool) {
 	response = false
 
 	// if level is above 10, exit
@@ -81,14 +79,14 @@ func runTask(id string, task task, tasksRun *[]string, con config, level int, se
 		Compose:    task.Compose,
 		Enviroment: getEnviroment(task.Envfile),
 		Registry:   task.Registry,
-		Secret:     secret,
+		Secret:     getSec(),
 		Version:    sharpCDVersion}
 
 	// check for task dependencies
 	if len(task.Depends) != 0 {
 		for _, taskDep := range task.Depends {
 			level++
-			runTask(taskDep, con.Tasks[taskDep], tasksRun, con, level, secret)
+			runTask(taskDep, con.Tasks[taskDep], tasksRun, con, level)
 		}
 	}
 
@@ -106,6 +104,8 @@ func runTask(id string, task task, tasksRun *[]string, con config, level int, se
 		var url string
 
 		// if the sharpurl flag is set, use it
+
+		// print sharpURL
 		if len(sharpURL) != 0 {
 			url = sharpURL
 		} else {
@@ -117,7 +117,7 @@ func runTask(id string, task task, tasksRun *[]string, con config, level int, se
 		if code == statCode.Accepted {
 			fmt.Printf("Task [%s] succesfully sent!\n", task.Name)
 			fmt.Println("=================")
-			err := postCommChecks(task, id)
+			err := postCommChecks(task, id, url)
 			if err != nil {
 				response = true
 			}
