@@ -39,4 +39,6 @@ func handleAPI(e error, job *taskJob, msg string) {
 		job.ErrMsg = msg
 		job.Status = jobStatus.Errored
 	}
+
+	fmt.Println("DEBUG:", job.ErrMsg, job.Status, e)
 }

@@ -65,9 +65,9 @@ func getEnviroment(loc string) map[string]string {
 	return env
 }
 
-func postCommChecks(t task, id string) error {
-	jobURL := t.SharpURL + "/api/job/" + id
-	logsURL := t.SharpURL + "/api/logs/" + id
+func postCommChecks(t task, id string, url string) error {
+	jobURL := url + "/api/job/" + id
+	logsURL := url + "/api/logs/" + id
 	payload := postData{
 		Secret: getSec()}
 	buildingTriggered := false

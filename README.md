@@ -41,12 +41,12 @@ tasks:
 # Installation
 On linux, just run:
 ```console
-sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/3.4/install.sh | sudo bash
+sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/3.6/install.sh | sudo bash
 ```
 
 Or for just the client:
 ```console
-sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/3.4/install.sh | sudo bash -s client
+sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/3.6/install.sh | sudo bash -s client
 ```
 
 ## Command Options
@@ -90,9 +90,3 @@ Flags:
 ## Maintainers
 
 - [Adam McArthur](https://adam.mcaq.me)
-
-
-## To Do
-
-- Viewing a job causes disconnect after a certain time
-- Add more client-only server commands like logs and "enter" i.e exec /bin/sh

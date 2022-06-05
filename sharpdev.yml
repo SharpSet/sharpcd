@@ -11,7 +11,7 @@ scripts:
 
   sharpcd: |
     sharpdev build
-    ./internal/sharpcd $_ARG1 $_ARG2 $_ARG3 $_ARG4 $_ARG5
+    ./internal/sharpcd $_ARG1 $_ARG2 $_ARG3 $_ARG4 $_ARG5 $_ARG6 $_ARG7
 
   sharedserver: |
     sharpdev kill
@@ -27,9 +27,8 @@ scripts:
 
   test: |
     sharpdev server
-    sharpdev client
-    echo
-    sharpdev clientr
+    sharpdev client_test_different_url
+    sharpdev client_test_password
     sharpdev kill
 
   kill: |
@@ -47,9 +46,13 @@ scripts:
     sharpdev shared
     ./internal/sharpcd --secret $PASSD
 
-  clientr: |
+  client_test_different_url: |
     sharpdev shared
-    sharpdev sharpcd --secret $PASSD --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/master/sharpcd.yml
+    sharpdev sharpcd --secret $PASSD --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/dev/testing/configs/different_url/sharpcd.yml --sharpurl https://localhost:5666
+
+  client_test_password: |
+    sharpdev shared
+    sharpdev sharpcd --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/dev/testing/configs/passwords/sharpcd.yml
 
   trak: |
     sharpdev build

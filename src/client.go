@@ -101,12 +101,23 @@ func runTask(id string, task task, tasksRun *[]string, con config, level int) (r
 
 	if !alreadyRun {
 
+		var url string
+
+		// if the sharpurl flag is set, use it
+
+		// print sharpURL
+		if len(sharpURL) != 0 {
+			url = sharpURL
+		} else {
+			url = task.SharpURL
+		}
+
 		// Make POST request and let user know if successful
-		body, code := post(payload, task.SharpURL)
+		body, code := post(payload, url)
 		if code == statCode.Accepted {
 			fmt.Printf("Task [%s] succesfully sent!\n", task.Name)
 			fmt.Println("=================")
-			err := postCommChecks(task, id)
+			err := postCommChecks(task, id, url)
 			if err != nil {
 				response = true
 			}
