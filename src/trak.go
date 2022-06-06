@@ -138,6 +138,9 @@ func liveFeed() {
 
 	urlJobs = con.Trak[location] + "/api/jobs/"
 
+	// Insert needed data
+	secret := getSec()
+
 	// Only needed for single job requests
 	if trakArg == trakOne {
 		if len(flag.Args()) < 4 {
@@ -149,10 +152,18 @@ func liveFeed() {
 
 		urlJob = con.Trak[location] + "/api/job/" + jobID
 		urlLog = con.Trak[location] + "/api/logsfeed/" + jobID
-	}
 
-	// Insert needed data
-	secret := getSec()
+		// Tests to check if job exists
+		apiOutput, code := getAPIOutput(urlJob, secret)
+
+		if code == statCode.Accepted {
+			fmt.Printf("Connection to API...")
+		} else {
+			fmt.Println(apiOutput.Message)
+			fmt.Println()
+			os.Exit(1)
+		}
+	}
 
 	// Tests to ensure you can actually reach the server
 	apiOutput, code := getAPIOutput(urlJobs, secret)
@@ -161,7 +172,8 @@ func liveFeed() {
 		fmt.Printf("Connection to API...")
 	} else {
 		fmt.Println(apiOutput.Message)
-		fmt.Printf("APi Connection Failed!\n")
+		fmt.Println()
+		fmt.Printf("API Connection Failed!\n")
 		os.Exit(1)
 	}
 

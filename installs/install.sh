@@ -130,6 +130,10 @@ then
 
   read -p "Enter your repository name: " filter_loc
   sudo sharpcd addfilter $filter_loc
+
+  echo "To get a github token, visit https://github.com/settings/tokens"
+  read -p "Enter your GitHub token: " token
+  sudo sharpcd changetoken $token
 fi
 
 

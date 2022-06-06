@@ -16,6 +16,7 @@ type statusCodes struct {
 	CommDoesNotExist int
 	FailedLogRead    int
 	WrongVersion     int
+	JobDoesNotExist  int
 }
 
 var statCode = statusCodes{
@@ -27,7 +28,8 @@ var statCode = statusCodes{
 	FailedLogRead:    614,
 	BannedURL:        616,
 	CommDoesNotExist: 617,
-	WrongVersion:     618}
+	WrongVersion:     618,
+	JobDoesNotExist:  619}
 
 var (
 	upgrader = websocket.Upgrader{

@@ -69,5 +69,5 @@ tasks:
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
     compose: /sharpcd/dev/testing/trak.yml
-    depends:
-      - file_task
+    # depends:
+    #   - file_task

@@ -86,6 +86,12 @@ func runTask(id string, task task, tasksRun *[]string, con config, level int) (r
 	if len(task.Depends) != 0 {
 		for _, taskDep := range task.Depends {
 			level++
+
+			// if task is not in con.Tasks, error
+			if _, ok := con.Tasks[taskDep]; !ok {
+				fmt.Println("Task", taskDep, "is not in your config.yml")
+				os.Exit(1)
+			}
 			runTask(taskDep, con.Tasks[taskDep], tasksRun, con, level)
 		}
 	}
