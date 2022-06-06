@@ -95,16 +95,9 @@ func getDir() string {
 	var exPath string
 	var err error
 
-	if os.Getenv("DEV") == "TRUE" {
-		exPath, err = os.Getwd()
-		handle(err, "Failed to get dir")
-
-	} else {
-		ex, err := os.Executable()
-		handle(err, "Failed to get dir")
-		exPath = filepath.Dir(ex)
-
-	}
+	ex, err := os.Executable()
+	handle(err, "Failed to get dir")
+	exPath = filepath.Dir(ex)
 
 	return exPath
 }

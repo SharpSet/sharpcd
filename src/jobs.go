@@ -76,6 +76,10 @@ func (job *taskJob) Run() {
 	logsLoc := folder.Docker + id
 	composeLoc := folder.Docker + id + "/docker-compose.yml"
 
+	// Flush Logs
+	_, err := os.Create(logsLoc + "/info.log")
+	handleAPI(err, job, "Failed to empty log file")
+
 	// Mark as building
 	job.Status = jobStatus.Building
 
@@ -112,7 +116,7 @@ func (job *taskJob) Run() {
 
 		job.Status = jobStatus.Stopped
 
-		fmt.Println("Stopped:", job.ID, "Kill:", job.Kill)
+		fmt.Println("DEBUG:", job.ID+" was stopped.")
 
 		go job.DockerLog(cmd)
 
@@ -122,7 +126,7 @@ func (job *taskJob) Run() {
 // Log the dockerfile until the job has been killed
 func (job *taskJob) DockerLog(cmd *exec.Cmd) {
 
-	fmt.Println("Running extended logs")
+	fmt.Println("Running extended logs for", job.ID)
 
 	for job.Kill == false {
 		cmd.Run()
@@ -130,7 +134,7 @@ func (job *taskJob) DockerLog(cmd *exec.Cmd) {
 		time.Sleep(1 * time.Second)
 	}
 
-	fmt.Println("Exited:", job.ID)
+	fmt.Println("DEBUG:", job.ID+" was stopped. (Killed by job.Kill)")
 }
 
 // Get cmd for a Docker Job
@@ -173,7 +177,7 @@ func (job *taskJob) DockerSetup() {
 
 	if strings.Contains(string(file), "404") {
 		err = errors.New("404 in Compose File")
-		text := "Github Token invalid or wrong compose URL"
+		text := "Github Token invalid or wrong compose URL: \n" + string(file) + "\n" + url + "\n"
 		handleAPI(err, job, text)
 		job.Issue = text
 	}

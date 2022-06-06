@@ -2,9 +2,17 @@
 
 # SharpCD || Continuous Development for your server!
 
-![](https://files.mcaq.me/zbnf.png)
+SharpCD is a simple, yet powerful, continuous development tool for your server.
+It allows you to easily deploy, manage and track docker-compose projects from any location.
+
+![](https://files.mcaq.me/r4844.png)
 
 # Example Config
+
+Everything is controlled by the `sharpcd.yml` file. You can also use
+remote configuration files, allowing for easy deployment of multiple projects that can
+have multiple dependencies.
+
 ```yml
 version: 1
 
@@ -30,7 +38,7 @@ tasks:
     compose: /sharpcd/dev/testing/registry.yml
 
   env_task:
-    name: Enviroment Test Fail
+    name: Enviroment Test
     type: docker
     envfile: .env
     sharpurl: https://localhost:5666
@@ -67,13 +75,13 @@ Args of SharpCD:
 
 Sub Command Trak:
 
-        - sharpcd trak alljobs {location} {type}
+        - sharpcd trak alljobs {location}
                 Get info on all jobs
 
-        - sharpcd trak job {location} {type} {job_id}
+        - sharpcd trak job {location} {job_id}
                 Get info on job with logging
 
-        - sharpcd trak list {location} {type}
+        - sharpcd trak list {location}
                 Get all jobs running on sharpcd server
 
         - sharpcd trak logs {location} {job_id}

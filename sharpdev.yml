@@ -27,6 +27,7 @@ scripts:
 
   test: |
     sharpdev server
+    sharpdev client
     sharpdev client_test_different_url
     sharpdev client_test_password
     sharpdev kill

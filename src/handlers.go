@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strings"
 
 	"github.com/hashicorp/go-version"
 )
@@ -20,6 +21,9 @@ func httpHandleAPI(w http.ResponseWriter, r *http.Request) {
 	// Do Common Checks
 	commonHandlerChecks(r, &status)
 
+	// Check if job exists
+	checkJobExists(r, &status)
+
 	resp := response{}
 	w.WriteHeader(status)
 
@@ -30,7 +34,7 @@ func httpHandleAPI(w http.ResponseWriter, r *http.Request) {
 	if status == statCode.Accepted {
 
 	} else {
-		resp.Message = getFailMessage(status) + " Message: " + resp.Message
+		resp.Message = getFailMessage(status) + "\nMessage: " + resp.Message
 	}
 
 	json.NewEncoder(w).Encode(resp)
@@ -101,6 +105,9 @@ func getFailMessage(status int) string {
 	case statCode.FailedLogRead:
 		return "SharpCD: Could not read log file for job"
 
+	case statCode.JobDoesNotExist:
+		return "SharpCD: Job does not exist"
+
 	default:
 		return "No Fail Message"
 	}
@@ -126,6 +133,22 @@ func commonHandlerChecks(r *http.Request, status *int) postData {
 	handleStatus(err, statCode.IncorrectSecret, status)
 
 	return payload
+}
+
+func checkJobExists(r *http.Request, status *int) {
+
+	path := strings.Split(r.URL.Path[5:], "/")
+	jobID := path[1]
+
+	if path[0] == "job" {
+		for _, job := range allJobs {
+			if job.ID == jobID {
+				return
+			}
+		}
+
+		*status = statCode.JobDoesNotExist
+	}
 }
 
 // Check the correct http method is used
