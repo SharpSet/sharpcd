@@ -49,7 +49,7 @@ scripts:
 
   client_test_different_url: |
     sharpdev shared
-    sharpdev sharpcd --secret $PASSD --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/dev/testing/configs/different_url/sharpcd.yml --sharpurl https://localhost:5666
+    sharpdev sharpcd --secret $PASSD --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/dev/testing/configs/different_url/sharpcd.yml
 
   client_test_password: |
     sharpdev shared
