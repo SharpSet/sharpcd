@@ -14,7 +14,7 @@ type ScriptVersion struct {
 var scriptVersions = []ScriptVersion{
 	{
 		Version: 1.1,
-		WorksOn: "V3.6 and up",
+		WorksOn: "V3.7 and up",
 	},
 	{
 		Version: 1.0,

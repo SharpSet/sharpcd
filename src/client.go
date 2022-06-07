@@ -114,8 +114,10 @@ func runTask(id string, task task, tasksRun *[]string, con config, level int) (r
 		// print sharpURL
 		if len(sharpURL) != 0 {
 			url = sharpURL
-		} else {
+		} else if len(task.SharpURL) != 0 {
 			url = task.SharpURL
+		} else {
+			url = getSharpURL()
 		}
 
 		// Make POST request and let user know if successful

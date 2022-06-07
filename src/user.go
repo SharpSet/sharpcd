@@ -10,6 +10,7 @@ import (
 
 var hashLoc = folder.Private + "/hash.secret"
 var secCache string
+var sharpURLCache string
 
 func checkSecret(sec string) error {
 
@@ -64,4 +65,29 @@ func setSec() {
 	if err == nil {
 		fmt.Println("Secret successfully created!")
 	}
+}
+
+func getSharpURL() string {
+
+	// if cache is set, return that
+	if len(sharpURLCache) != 0 {
+		return sharpURLCache
+	}
+
+	// If secret is not in args
+	if len(sharpURL) == 0 {
+
+		// Get secret from user
+		fmt.Println("Enter URl to send request to: ")
+		var url string
+		_, err := fmt.Scanln(&url)
+		handle(err, "Failed to read url")
+
+		// set cache
+		sharpURLCache = string(url)
+		return string(url)
+	}
+
+	// Otherwise, return flag with secret
+	return sharpURL
 }
