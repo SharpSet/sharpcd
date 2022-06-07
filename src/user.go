@@ -77,11 +77,13 @@ func getSharpURL() string {
 	// If secret is not in args
 	if len(sharpURL) == 0 {
 
-		// Get secret from user
-		fmt.Println("Enter URl to send request to: ")
+		// Get sharpurl from user
+		fmt.Println()
+		fmt.Println("Enter URl to send request to (e.g https://localhost:5666): ")
 		var url string
 		_, err := fmt.Scanln(&url)
 		handle(err, "Failed to read url")
+		fmt.Println()
 
 		// set cache
 		sharpURLCache = string(url)
