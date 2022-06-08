@@ -111,8 +111,10 @@ func (job *taskJob) Run() {
 		// Run Command
 		job.Status = jobStatus.Running
 
-		err = cmd.Run()
-		handleAPI(err, job, "Job Exited With Error")
+		var out []byte
+
+		out, err = cmd.CombinedOutput()
+		handleAPI(err, job, "Job Exited With Error"+string(out))
 
 		job.Status = jobStatus.Stopped
 
@@ -295,6 +297,8 @@ func (job *taskJob) buildCommand(args ...string) error {
 				re := regexp.MustCompile("`(.*)`")
 				command := strings.ReplaceAll(string(re.Find(out)), "`", "")
 				commands := strings.Split(command, " ")
+
+				fmt.Println("DEBUG: Creating a docker part", command)
 
 				// Create Missing Element
 				cmd := exec.Command(commands[0], commands[1:]...)
