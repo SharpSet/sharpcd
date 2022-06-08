@@ -290,6 +290,8 @@ func (job *taskJob) buildCommand(args ...string) error {
 			cmd := exec.Command("docker-compose", args...)
 			out, err = cmd.CombinedOutput()
 
+			fmt.Println("DEBUG:", string(out), "from", job.ID)
+
 			if strings.Contains(string(out), "manually using `") {
 				// Find Docker Command
 				re := regexp.MustCompile("`(.*)`")
@@ -301,6 +303,8 @@ func (job *taskJob) buildCommand(args ...string) error {
 
 				// Handle Errors
 				out, err := cmd.CombinedOutput()
+
+				fmt.Println("DEBUG:", string(out), "from", job.ID)
 				handleAPI(err, job, string(out))
 			} else {
 				break
@@ -309,6 +313,7 @@ func (job *taskJob) buildCommand(args ...string) error {
 
 	} else {
 		errMsg = string(out)
+		fmt.Println("DEBUG:", errMsg, "from", job.ID)
 		handleAPI(err, job, errMsg)
 		return err
 	}
