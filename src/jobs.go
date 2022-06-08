@@ -263,14 +263,14 @@ func (job *taskJob) dockerLogin() {
 	cmd := exec.Command("docker", "login", "-u", job.Enviroment["DOCKER_USER"], "-p", job.Enviroment["DOCKER_PASS"], job.Registry)
 	out, err := cmd.CombinedOutput()
 	errMsg := string(out)
-	handleAPI(err, job, errMsg)
+	handleAPI(err, job, errMsg+" (in Docker Login)")
 }
 
 func (job *taskJob) dockerLogout() {
 	cmd := exec.Command("docker", "logout", job.Registry)
 	out, err := cmd.CombinedOutput()
 	errMsg := string(out)
-	handleAPI(err, job, errMsg)
+	handleAPI(err, job, errMsg+" (in Docker Logout)")
 }
 
 func (job *taskJob) buildCommand(args ...string) error {
@@ -282,15 +282,13 @@ func (job *taskJob) buildCommand(args ...string) error {
 	// Add conditions for volumes and networks
 	if strings.Contains(string(out), "404") {
 		errMsg = "No Compose File Found!"
-		handleAPI(err, job, errMsg)
+		handleAPI(err, job, errMsg+" (in Build Command 404 check)")
 		return err
 	} else if strings.Contains(string(out), "manually using `") {
 
 		for {
 			cmd := exec.Command("docker-compose", args...)
 			out, err = cmd.CombinedOutput()
-
-			fmt.Println("DEBUG:", string(out), "from", job.ID)
 
 			if strings.Contains(string(out), "manually using `") {
 				// Find Docker Command
@@ -304,7 +302,6 @@ func (job *taskJob) buildCommand(args ...string) error {
 				// Handle Errors
 				out, err := cmd.CombinedOutput()
 
-				fmt.Println("DEBUG:", string(out), "from", job.ID)
 				handleAPI(err, job, string(out))
 			} else {
 				break
@@ -313,8 +310,7 @@ func (job *taskJob) buildCommand(args ...string) error {
 
 	} else {
 		errMsg = string(out)
-		fmt.Println("DEBUG:", errMsg, "from", job.ID)
-		handleAPI(err, job, errMsg)
+		handleAPI(err, job, errMsg+" (in Build Command string didn't contain what was expected)")
 		return err
 	}
 
