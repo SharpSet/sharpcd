@@ -120,6 +120,12 @@ func runTask(id string, task task, tasksRun *[]string, con config, level int) (r
 			url = getSharpURL()
 		}
 
+		// check that url contains http, if it does replace with https
+
+		if strings.Contains(url, "http://") {
+			url = strings.Replace(url, "http://", "https://", 1)
+		}
+
 		// Make POST request and let user know if successful
 		body, code := post(payload, url)
 		if code == statCode.Accepted {
