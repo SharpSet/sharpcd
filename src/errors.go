@@ -34,7 +34,7 @@ func handleStatus(e error, status int, passedChecks *int) {
 
 // checks for server err
 // Writes response to API call
-func handleAPI(e error, job *taskJob, msg string) {
+func handleAPI(errMsg string, e error, job *taskJob, msg string) {
 	if e != nil && job.ErrMsg == "" {
 		job.ErrMsg = msg
 		job.Status = jobStatus.Errored
@@ -42,7 +42,7 @@ func handleAPI(e error, job *taskJob, msg string) {
 
 	if e != nil {
 		jobText := fmt.Sprintf("{%s}:", job.ID)
-		fmt.Println("DEBUG [Error Handler]:", jobText, msg, job.Status, e)
+		fmt.Println("DEBUG [Error Handler]:", jobText, msg, job.Status, e.Error()+" "+errMsg)
 		fmt.Println()
 	}
 }
