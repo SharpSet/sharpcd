@@ -9,7 +9,7 @@ services:
       - SHARPDOMAINS=test.mcaq.me
 
     volumes:
-      - "xternal2_test:/home/coder"
+      - "external2:/home/coder"
 
     command: code-server --auth password
     restart: always

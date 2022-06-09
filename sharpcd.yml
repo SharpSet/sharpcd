@@ -5,69 +5,77 @@ trak:
   remote: https://mcaq.me:5666
 
 tasks:
-  basic_task:
-    name: Basic
-    type: docker
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/basic.yml
+  # basic_task:
+  #   name: Basic
+  #   type: docker
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/basic.yml
 
-  registry_task:
-    name: Registry
-    type: docker
-    registry: docker.mcaq.me
-    envfile: .env
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/registry.yml
+  # registry_task:
+  #   name: Registry
+  #   type: docker
+  #   registry: docker.mcaq.me
+  #   envfile: .env
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/registry.yml
 
-  env_task:
-    name: Enviroment Test Fail
-    type: docker
-    envfile: .env
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/env.yml
+  # env_task:
+  #   name: Enviroment Test Fail
+  #   type: docker
+  #   envfile: .env
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/env.yml
 
-  external_task:
-    name: External Docker Parts
-    type: docker
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/external.yml
+  # external_task:
+  #   name: External Docker Parts
+  #   type: docker
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/external.yml
 
-  env_task2:
-    name: Enviroment Test Pass
-    type: docker
-    envfile: ./testing/.env
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/env.yml
-    depends:
-      - env_task
-      - basic_task
+  # env_task2:
+  #   name: Enviroment Test Pass
+  #   type: docker
+  #   envfile: ./testing/.env
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/env.yml
+  #   depends:
+  #     - env_task
+  #     - basic_task
 
-  file_task:
-    name: No Compose File
-    type: docker
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/basic
-    depends:
-      - env_task2
+  # file_task:
+  #   name: No Compose File
+  #   type: docker
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/basic
+  #   depends:
+  #     - env_task2
 
-  restart_task:
-    name: Test Log exit
-    type: docker
-    sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/restart.yml
+  # restart_task:
+  #   name: Test Log exit
+  #   type: docker
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/restart.yml
 
-  trak_task:
-    name: Trak Log Test
+  # trak_task:
+  #   name: Trak Log Test
+  #   type: docker
+  #   sharpurl: https://localhost:5666
+  #   giturl: https://raw.githubusercontent.com/Sharpz7/
+  #   compose: /sharpcd/dev/testing/trak.yml
+  #   depends:
+  #     - file_task
+
+
+  external2_task:
+    name: External Docker Parts (2)
     type: docker
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/Sharpz7/
-    compose: /sharpcd/dev/testing/trak.yml
-    # depends:
-    #   - file_task
+    compose: /sharpcd/dev/testing/external2.yml
