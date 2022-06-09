@@ -10,8 +10,8 @@ services:
 networks:
   default:
       external:
-          name: memes
+          name: external1
 
 volumes:
-  memes:
+  external1:
     external: True

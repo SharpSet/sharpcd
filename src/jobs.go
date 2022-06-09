@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -78,7 +79,7 @@ func (job *taskJob) Run() {
 
 	// Flush Logs
 	_, err := os.Create(logsLoc + "/info.log")
-	handleAPI(err, job, "Failed to empty log file")
+	handleAPI("", err, job, "Failed to empty log file")
 
 	// Mark as building
 	job.Status = jobStatus.Building
@@ -104,17 +105,15 @@ func (job *taskJob) Run() {
 
 		// Empty the logs file
 		outfile, err := os.Create(logsLoc + "/info.log")
-		handleAPI(err, job, "Failed to create log file")
+		handleAPI("", err, job, "Failed to create log file")
 		job.ErrMsg = ""
 		cmd.Stdout = outfile
 
 		// Run Command
 		job.Status = jobStatus.Running
 
-		var out []byte
-
-		out, err = cmd.CombinedOutput()
-		handleAPI(err, job, "Job Exited With Error"+string(out))
+		err = cmd.Run()
+		handleAPI("", err, job, "Job Exited With Error")
 
 		job.Status = jobStatus.Stopped
 
@@ -151,13 +150,13 @@ func (job *taskJob) DockerSetup() {
 	// Get github token
 	f, err := readFilter()
 	if err != nil {
-		handleAPI(err, job, "Failed to get Token")
+		handleAPI("", err, job, "Failed to get Token")
 	}
 
 	// Make url, read the compose file
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		handleAPI(err, job, "Failed to build request")
+		handleAPI("", err, job, "Failed to build request")
 	}
 
 	if f.Token != "" {
@@ -167,11 +166,11 @@ func (job *taskJob) DockerSetup() {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		handleAPI(err, job, "Failed to get compose URL")
+		handleAPI("", err, job, "Failed to get compose URL")
 	}
 	defer resp.Body.Close()
 	file, err := ioutil.ReadAll(resp.Body)
-	handleAPI(err, job, "Failed to read compose file")
+	handleAPI("", err, job, "Failed to read compose file")
 
 	// Make directory for docker and logs and save file
 	os.Mkdir(folder.Docker+id, 0777)
@@ -180,7 +179,7 @@ func (job *taskJob) DockerSetup() {
 	if strings.Contains(string(file), "404") {
 		err = errors.New("404 in Compose File")
 		text := "Github Token invalid or wrong compose URL: \n" + string(file) + "\n" + url + "\n"
-		handleAPI(err, job, text)
+		handleAPI("", err, job, text)
 		job.Issue = text
 	}
 
@@ -193,13 +192,13 @@ func (job *taskJob) DockerSetup() {
 			err = os.Remove(composeLoc)
 
 			if err != nil {
-				handleAPI(err, job, "Failed to Remove")
+				handleAPI("", err, job, "Failed to Remove")
 			}
 		}
 
 		// Write to file
 		err = ioutil.WriteFile(composeLoc, file, 0777)
-		handleAPI(err, job, "Failed to write to file")
+		handleAPI("", err, job, "Failed to write to file")
 	}
 
 	if job.Registry != "" {
@@ -238,7 +237,26 @@ func (job *taskJob) insertEnviroment() []string {
 		_, err = os.Create(envfile)
 		err = godotenv.Write(job.Enviroment, envfile)
 
-		handleAPI(err, job, "Failed to write to Envfile")
+		// open envfile and remove all quotes, then save
+		file, err := os.Open(envfile)
+		if err != nil {
+			handleAPI("", err, job, "Failed to open envfile")
+		}
+		defer file.Close()
+		// remove quotes
+		scanner := bufio.NewScanner(file)
+		for scanner.Scan() {
+			environ = append(environ, strings.Replace(scanner.Text(), "\"", "", -1))
+		}
+		// Close file
+		err = scanner.Err()
+		if err != nil {
+			handleAPI("", err, job, "Failed to scan envfile")
+		}
+
+		// save new envfile
+		err = ioutil.WriteFile(envfile, []byte(strings.Join(environ, "\n")), 0777)
+
 	} else {
 		// Check if file exists for .env vars
 
@@ -265,14 +283,14 @@ func (job *taskJob) dockerLogin() {
 	cmd := exec.Command("docker", "login", "-u", job.Enviroment["DOCKER_USER"], "-p", job.Enviroment["DOCKER_PASS"], job.Registry)
 	out, err := cmd.CombinedOutput()
 	errMsg := string(out)
-	handleAPI(err, job, errMsg+" (in Docker Login)")
+	handleAPI("(in Docker Login)", err, job, errMsg)
 }
 
 func (job *taskJob) dockerLogout() {
 	cmd := exec.Command("docker", "logout", job.Registry)
 	out, err := cmd.CombinedOutput()
 	errMsg := string(out)
-	handleAPI(err, job, errMsg+" (in Docker Logout)")
+	handleAPI("(in Docker Logout)", err, job, errMsg)
 }
 
 func (job *taskJob) buildCommand(args ...string) error {
@@ -284,7 +302,7 @@ func (job *taskJob) buildCommand(args ...string) error {
 	// Add conditions for volumes and networks
 	if strings.Contains(string(out), "404") {
 		errMsg = "No Compose File Found!"
-		handleAPI(err, job, errMsg+" (in Build Command 404 check)")
+		handleAPI("(in Build Command 404 check)", err, job, errMsg)
 		return err
 	} else if strings.Contains(string(out), "manually using `") {
 
@@ -306,7 +324,7 @@ func (job *taskJob) buildCommand(args ...string) error {
 				// Handle Errors
 				out, err := cmd.CombinedOutput()
 
-				handleAPI(err, job, string(out))
+				handleAPI("", err, job, string(out))
 			} else {
 				break
 			}
@@ -314,7 +332,7 @@ func (job *taskJob) buildCommand(args ...string) error {
 
 	} else {
 		errMsg = string(out)
-		handleAPI(err, job, errMsg+" (in Build Command string didn't contain what was expected)")
+		handleAPI("(in Build Command string didn't contain what was expected)", err, job, errMsg)
 		return err
 	}
 
