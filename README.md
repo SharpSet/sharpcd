@@ -50,12 +50,12 @@ tasks:
 # Installation
 On linux, just run:
 ```console
-sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/3.7/install.sh | sudo bash
+sudo curl -s -L https://github.com/SharpSet/sharpcd/releases/download/3.7/install.sh | sudo bash
 ```
 
 Or for just the client:
 ```console
-sudo curl -s -L https://github.com/Sharpz7/sharpcd/releases/download/3.7/install.sh | sudo bash -s client
+sudo curl -s -L https://github.com/SharpSet/sharpcd/releases/download/3.7/install.sh | sudo bash -s client
 ```
 
 ## Command Options
