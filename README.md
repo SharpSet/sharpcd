@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/Sharpz7/sharpcd.svg?style=svg)](https://circleci.com/gh/Sharpz7/sharpcd)
+[![CircleCI](https://circleci.com/gh/SharpSet/sharpcd.svg?style=svg)](https://circleci.com/gh/SharpSet/sharpcd)
 
 ![SharpCD](https://files.mcaq.me/043h0.png)
 # Continuous Development for your server!
@@ -26,7 +26,7 @@ tasks:
     name: Basic
     type: docker
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/basic.yml
 
   registry_task:
@@ -35,7 +35,7 @@ tasks:
     registry: docker.mcaq.me
     envfile: .env
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/registry.yml
 
   env_task:
@@ -43,7 +43,7 @@ tasks:
     type: docker
     envfile: .env
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/env.yml
 ```
 
