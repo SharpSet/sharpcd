@@ -1,6 +1,7 @@
 [![CircleCI](https://circleci.com/gh/Sharpz7/sharpcd.svg?style=svg)](https://circleci.com/gh/Sharpz7/sharpcd)
 
-# SharpCD || Continuous Development for your server!
+![SharpCD](https://files.mcaq.me/043h0.png)
+# Continuous Development for your server!
 
 SharpCD is a simple, yet powerful, continuous development tool for your server.
 It allows you to easily deploy, manage and track docker-compose projects from any location.

@@ -9,7 +9,7 @@ tasks:
     name: Basic
     type: docker
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/basic.yml
 
   registry_task:
@@ -18,7 +18,7 @@ tasks:
     registry: docker.mcaq.me
     envfile: .env
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/registry.yml
 
   env_task:
@@ -26,14 +26,14 @@ tasks:
     type: docker
     envfile: .env
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/env.yml
 
   external_task:
     name: External Docker Parts
     type: docker
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/external.yml
 
   env_task2:
@@ -41,7 +41,7 @@ tasks:
     type: docker
     envfile: ./testing/.env
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/env.yml
     depends:
       - env_task
@@ -51,7 +51,7 @@ tasks:
     name: No Compose File
     type: docker
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/basic
     depends:
       - env_task2
@@ -60,14 +60,14 @@ tasks:
     name: Test Log exit
     type: docker
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/restart.yml
 
   trak_task:
     name: Trak Log Test
     type: docker
     sharpurl: https://localhost:5666
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/trak.yml
     depends:
       - file_task
