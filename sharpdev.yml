@@ -32,8 +32,8 @@ scripts:
 
   shared: |
     sudo docker-compose -f "./internal/sharpcd-data/docker/external_task/docker-compose.yml" down
-    $(sudo docker volume rm memes) > /dev/null 2>&1 || true
-    $(sudo docker network rm memes) > /dev/null 2>&1 || true
+    $(sudo docker volume rm externalv) > /dev/null 2>&1 || true
+    $(sudo docker network rm externalv) > /dev/null 2>&1 || true
 
   client: |
     sharpdev shared
