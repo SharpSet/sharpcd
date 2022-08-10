@@ -4,28 +4,22 @@ envfile: .env
 values:
   SECRETD: '{\"secret\":\"$PASSD\"}'
   SECRET: '{\"secret\":\"$PASS\"}'
+  sharpcd_internal: ./internal/sharpcd
+
+setup: |
+  go mod tidy
+  go build -o ./internal/sharpcd ./src
 
 scripts:
-  build: |
-    go build -o ./internal/sharpcd ./src
-
-  sharpcd: |
-    sharpdev build
-    ./internal/sharpcd $_ARG1 $_ARG2 $_ARG3 $_ARG4 $_ARG5 $_ARG6 $_ARG7
-
-  sharedserver: |
-    sharpdev kill
-    sharpdev build
-
   server: |
-    sharpdev sharedserver
-    sudo ./internal/sharpcd server > /dev/null 2>&1 &
+    sharpdev kill
+    sudo sharpcd_internal server > /dev/null 2>&1 &
 
   serveropen: |
-    sharpdev sharedserver
-    sudo ./internal/sharpcd server
+    sharpdev kill
+    sudo sharpcd_internal server
 
-  test: |
+  default: |
     sharpdev server
     sharpdev client
     sharpdev client_test_different_url
@@ -34,30 +28,30 @@ scripts:
 
   kill: |
     sudo apt-get install -y lsof
-
     sudo lsof -ti :5666 | sudo xargs --no-run-if-empty kill -9
 
   shared: |
     sudo docker-compose -f "./internal/sharpcd-data/docker/external_task/docker-compose.yml" down
     $(sudo docker volume rm memes) > /dev/null 2>&1 || true
     $(sudo docker network rm memes) > /dev/null 2>&1 || true
-    sharpdev build
 
   client: |
     sharpdev shared
-    ./internal/sharpcd --secret $PASSD
+    sharpcd_internal --secret $PASSD
+
+  clientonly:
+    sharpcd_internal --secret $PASSD
 
   client_test_different_url: |
     sharpdev shared
-    sharpdev sharpcd --secret $PASSD --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/dev/testing/configs/different_url/sharpcd.yml
+    sharpcd_internal --secret $PASSD --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/dev/testing/configs/different_url/sharpcd.yml
 
   client_test_password: |
     sharpdev shared
-    sharpdev sharpcd --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/dev/testing/configs/passwords/sharpcd.yml
+    sharpcd_internal --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/dev/testing/configs/passwords/sharpcd.yml
 
   trak: |
-    sharpdev build
-    ./internal/sharpcd --secret $PASSD trak $_ARG1 $_ARG2 $_ARG3
+    sharpcd_internal --secret $PASSD trak $_ARG1 $_ARG2 $_ARG3
 
   trakone: |
     sharpdev trak job local $_ARG1
@@ -71,9 +65,9 @@ scripts:
   traklogs: |
     sharpdev trak logs local $_ARG1
 
-  filter: ./internal/sharpcd addfilter https://raw.githubusercontent.com/Sharpz7/
-  remove: ./internal/sharpcd removefilter https://raw.githubusercontent.com/Sharpz7/
-  token: ./internal/sharpcd changetoken $_ARG1
+  filter: sharpcd_internal addfilter https://raw.githubusercontent.com/Sharpz7/
+  remove: sharpcd_internal removefilter https://raw.githubusercontent.com/Sharpz7/
+  token: sharpcd_internal changetoken $_ARG1
 
   alljobsd: curl -k -X POST -d SECRETD https://localhost:5666/api/jobs
   alljobs: curl -k -X POST -d SECRET https://173.312.252.82:5666/api/jobs
