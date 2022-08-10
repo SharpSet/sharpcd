@@ -36,13 +36,12 @@ tasks:
     giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/external.yml
 
-  external_task:
+  external2_task:
     name: External Host Volume
     type: docker
     sharpurl: https://localhost:5666
     giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/external2.yml
-
 
   env_task2:
     name: Enviroment Test Pass
