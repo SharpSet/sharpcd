@@ -3,7 +3,7 @@
 if [[ $1 == "client" ]];
 then
   # Download and unpack
-  wget https://github.com/Sharpz7/sharpcd/releases/download/XXXXX/linux.tar.gz
+  wget https://github.com/SharpSet/sharpcd/releases/download/XXXXX/linux.tar.gz
   sudo mkdir -p /tmp/sharpcd
   sudo tar -C /tmp/sharpcd -zxvf linux.tar.gz
   sudo cp /tmp/sharpcd/sharpcd /usr/local/bin/sharpcd
@@ -49,7 +49,7 @@ sudo rm /etc/systemd/system/sharpcd.service
 sudo systemctl daemon-reload
 
 # Download and unpack
-wget https://github.com/Sharpz7/sharpcd/releases/download/XXXXX/linux.tar.gz
+wget https://github.com/SharpSet/sharpcd/releases/download/XXXXX/linux.tar.gz
 sudo mkdir -p /tmp/sharpcd
 sudo tar -C /tmp/sharpcd -zxvf linux.tar.gz
 sudo cp -n -R /tmp/sharpcd/* /usr/local/bin/

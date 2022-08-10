@@ -44,29 +44,32 @@ scripts:
 
   client_test_different_url: |
     sharpdev shared
-    sharpcd_internal --secret $PASSD --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/dev/testing/configs/different_url/sharpcd.yml
+    sharpcd_internal --secret $PASSD --remotefile https://raw.githubusercontent.com/SharpSet/sharpcd/dev/testing/configs/different_url/sharpcd.yml
 
   client_test_password: |
     sharpdev shared
-    sharpcd_internal --remotefile https://raw.githubusercontent.com/Sharpz7/sharpcd/dev/testing/configs/passwords/sharpcd.yml
+    sharpcd_internal --remotefile https://raw.githubusercontent.com/SharpSet/sharpcd/dev/testing/configs/passwords/sharpcd.yml
 
-  trak: |
+  trak2: |
+    sharpcd_internal --secret $PASSD trak $_ARG1 $_ARG2
+
+  trak3: |
     sharpcd_internal --secret $PASSD trak $_ARG1 $_ARG2 $_ARG3
 
   trakone: |
-    sharpdev trak job local $_ARG1
+    sharpdev trak3 job local $_ARG1
 
   trakall: |
-    sharpdev trak alljobs local
+    sharpdev trak2 alljobs local
 
   traklist: |
-    sharpdev trak list local
+    sharpdev trak2 list local
 
   traklogs: |
-    sharpdev trak logs local $_ARG1
+    sharpdev trak3 logs local $_ARG1
 
-  filter: sharpcd_internal addfilter https://raw.githubusercontent.com/Sharpz7/
-  remove: sharpcd_internal removefilter https://raw.githubusercontent.com/Sharpz7/
+  filter: sharpcd_internal addfilter https://raw.githubusercontent.com/SharpSet/
+  remove: sharpcd_internal removefilter https://raw.githubusercontent.com/SharpSet/
   token: sharpcd_internal changetoken $_ARG1
 
   alljobsd: curl -k -X POST -d SECRETD https://localhost:5666/api/jobs
