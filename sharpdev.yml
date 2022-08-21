@@ -21,9 +21,9 @@ scripts:
 
   default: |
     sharpdev server
+    sharpdev client_test_different_url_and_password
     sharpdev client
-    sharpdev client_test_different_url
-    sharpdev client_test_password
+    sharpdev client_test_password_fail
     sharpdev kill
 
   kill: |
@@ -36,19 +36,16 @@ scripts:
     $(sudo docker network rm externalv) > /dev/null 2>&1 || true
 
   client: |
-    sharpdev shared
     sharpcd_internal --secret $PASSD
 
   clientonly:
     sharpcd_internal --secret $PASSD
 
-  client_test_different_url: |
-    sharpdev shared
+  client_test_different_url_and_password: |
     sharpcd_internal --secret $PASSD --remotefile https://raw.githubusercontent.com/SharpSet/sharpcd/dev/testing/configs/different_url/sharpcd.yml
 
-  client_test_password: |
-    sharpdev shared
-    sharpcd_internal --remotefile https://raw.githubusercontent.com/SharpSet/sharpcd/dev/testing/configs/passwords/sharpcd.yml
+  client_test_password_fail: |
+    sharpcd_internal --secret "Wrong" --remotefile https://raw.githubusercontent.com/SharpSet/sharpcd/dev/testing/configs/passwords/sharpcd.yml
 
   trak2: |
     sharpcd_internal --secret $PASSD trak $_ARG1 $_ARG2
