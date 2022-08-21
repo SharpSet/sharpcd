@@ -8,5 +8,5 @@ tasks:
   basic_task:
     name: Basic
     type: docker
-    giturl: https://raw.githubusercontent.com/Sharpz7/
+    giturl: https://raw.githubusercontent.com/SharpSet/
     compose: /sharpcd/dev/testing/basic.yml

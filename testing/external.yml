@@ -5,7 +5,7 @@ services:
     command: tail -f /dev/null
 
     volumes:
-      - "memes:/test"
+      - "externalv:/test"
 
 networks:
   default:
@@ -13,5 +13,5 @@ networks:
           name: external1
 
 volumes:
-  external1:
+  externalv:
     external: True
